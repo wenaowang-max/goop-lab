@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Gloop Lab - Element Mixing Game</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #1a1a2e;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+#gameContainer {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+#topBar {
+  background: linear-gradient(135deg, #16213e, #0f3460);
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 3px solid #e94560;
+  z-index: 10;
+  min-height: 54px;
+}
+#topBar h1 {
+  color: #e94560;
+  font-size: 20px;
+  margin-right: 8px;
+  text-shadow: 0 0 10px rgba(233,69,96,0.5);
+  white-space: nowrap;
+}
+#elementScroller {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #e94560 transparent;
+}
+#elementScroller::-webkit-scrollbar { height: 4px; }
+#elementScroller::-webkit-scrollbar-track { background: transparent; }
+#elementScroller::-webkit-scrollbar-thumb { background: #e94560; border-radius: 2px; }
+.cat-label {
+  color: #64748b;
+  font-size: 9px;
+  font-weight: bold;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  letter-spacing: 1px;
+  padding: 0 1px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.element-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.25);
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 13px;
+  color: #fff;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+  transition: transform 0.12s, box-shadow 0.12s;
+  position: relative;
+  flex-shrink: 0;
+}
+.element-btn:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 12px rgba(255,255,255,0.4);
+  z-index: 2;
+}
+.element-btn:active { transform: scale(0.92); }
+.element-btn .atomic-num {
+  position: absolute;
+  top: 1px;
+  left: 3px;
+  font-size: 7px;
+  opacity: 0.7;
+}
+.right-controls {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+.mode-btn {
+  padding: 5px 10px;
+  border-radius: 16px;
+  border: 2px solid #e94560;
+  background: transparent;
+  color: #e94560;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: bold;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.mode-btn.active { background: #e94560; color: #fff; }
+.mode-btn:hover { background: rgba(233,69,96,0.3); }
+#mainArea {
+  flex: 1;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+#journal {
+  width: 220px;
+  background: linear-gradient(180deg, #16213e, #1a1a2e);
+  border-left: 3px solid #e94560;
+  padding: 8px;
+  overflow-y: auto;
+  transition: width 0.3s;
+  flex-shrink: 0;
+}
+#journal.collapsed { width: 0; padding: 0; overflow: hidden; }
+#journal h2 {
+  color: #e94560;
+  font-size: 14px;
+  margin-bottom: 6px;
+  text-align: center;
+}
+.journal-entry {
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+  padding: 4px 6px;
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #888;
+  transition: background 0.3s;
+}
+.journal-entry.discovered {
+  background: rgba(233,69,96,0.15);
+  color: #fff;
+}
+.journal-entry .check {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+.journal-entry.discovered .check { border-color: #4ade80; color: #4ade80; }
+.journal-entry .formula { font-weight: bold; color: #e94560; }
+.journal-entry.discovered .formula { color: #f0abfc; }
+#journalToggle {
+  position: absolute;
+  right: 223px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #e94560;
+  color: #fff;
+  border: none;
+  border-radius: 8px 0 0 8px;
+  padding: 10px 4px;
+  cursor: pointer;
+  font-size: 14px;
+  z-index: 5;
+  transition: right 0.3s;
+}
+#journalToggle.collapsed { right: 0; }
+#stars { color: #fbbf24; font-size: 14px; white-space: nowrap; }
+#notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  background: rgba(16,33,60,0.95);
+  border: 3px solid #e94560;
+  border-radius: 16px;
+  padding: 20px 28px;
+  color: #fff;
+  text-align: center;
+  z-index: 100;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+#notification.show { transform: translate(-50%, -50%) scale(1); }
+#notification h3 { color: #e94560; font-size: 20px; margin-bottom: 4px; }
+#notification p { font-size: 14px; color: #ccc; }
+#notification .formula-big { font-size: 24px; color: #f0abfc; margin: 6px 0; }
+#timer { color: #fbbf24; font-size: 14px; font-weight: bold; display: none; }
+#clearBtn, #deleteHint {
+  padding: 4px 10px;
+  border-radius: 16px;
+  border: 2px solid #64748b;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: bold;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+#clearBtn:hover { background: rgba(100,116,139,0.3); }
+#deleteHint {
+  border-color: #475569;
+  cursor: default;
+  font-size: 10px;
+  color: #64748b;
+}
+#winOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+#winOverlay .win-content {
+  background: linear-gradient(135deg, #16213e, #0f3460);
+  border: 3px solid #fbbf24;
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  color: #fff;
+}
+#winOverlay h2 { font-size: 36px; color: #fbbf24; margin-bottom: 10px; }
+#winOverlay p { font-size: 18px; color: #ccc; margin-bottom: 20px; }
+#winOverlay button {
+  padding: 10px 30px;
+  border-radius: 25px;
+  border: none;
+  background: #e94560;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+#toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: rgba(16,33,60,0.9);
+  border: 2px solid #e94560;
+  border-radius: 12px;
+  padding: 10px 20px;
+  color: #fff;
+  font-size: 14px;
+  z-index: 50;
+  transition: transform 0.3s ease;
+  pointer-events: none;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+#infoPopup {
+  position: fixed;
+  background: rgba(16,33,60,0.95);
+  border: 2px solid #60a5fa;
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #fff;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  max-width: 220px;
+  text-align: center;
+}
+#infoPopup.show { opacity: 1; }
+#infoPopup .info-name { font-size: 18px; font-weight: bold; margin-bottom: 2px; }
+#infoPopup .info-symbol { font-size: 13px; color: #94a3b8; margin-bottom: 4px; }
+#infoPopup .info-fact { font-size: 13px; color: #fbbf24; }
+#hintBtn {
+  padding: 4px 10px;
+  border-radius: 16px;
+  border: 2px solid #fbbf24;
+  background: transparent;
+  color: #fbbf24;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: bold;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+#hintBtn:hover { background: rgba(251,191,36,0.2); }
+#hintPopup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  background: rgba(16,33,60,0.95);
+  border: 3px solid #fbbf24;
+  border-radius: 16px;
+  padding: 20px 28px;
+  color: #fff;
+  text-align: center;
+  z-index: 100;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+#hintPopup.show { transform: translate(-50%, -50%) scale(1); }
+#hintPopup h3 { color: #fbbf24; font-size: 18px; margin-bottom: 8px; }
+#hintPopup .hint-elements { font-size: 22px; color: #60a5fa; margin: 8px 0; font-weight: bold; }
+#hintPopup .hint-result { font-size: 14px; color: #ccc; }
+#leaderboardBtn {
+  padding: 4px 10px;
+  border-radius: 16px;
+  border: 2px solid #a78bfa;
+  background: transparent;
+  color: #a78bfa;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: bold;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+#leaderboardBtn:hover { background: rgba(167,139,250,0.2); }
+#leaderboardOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+#leaderboardOverlay .lb-content {
+  background: linear-gradient(135deg, #16213e, #0f3460);
+  border: 3px solid #a78bfa;
+  border-radius: 20px;
+  padding: 28px 32px;
+  color: #fff;
+  min-width: 360px;
+  max-width: 450px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+#leaderboardOverlay h2 { font-size: 24px; color: #a78bfa; margin-bottom: 12px; text-align: center; }
+#leaderboardOverlay table { width: 100%; border-collapse: collapse; }
+#leaderboardOverlay th {
+  text-align: left;
+  color: #94a3b8;
+  font-size: 11px;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+#leaderboardOverlay td {
+  padding: 6px 8px;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+#leaderboardOverlay tr.highlight td { color: #fbbf24; font-weight: bold; }
+#leaderboardOverlay .rank { color: #a78bfa; font-weight: bold; width: 30px; }
+#leaderboardOverlay .lb-name { max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+#leaderboardOverlay .lb-empty { text-align: center; color: #64748b; padding: 20px; font-size: 14px; }
+#leaderboardOverlay .lb-close {
+  display: block;
+  margin: 16px auto 0;
+  padding: 8px 24px;
+  border-radius: 20px;
+  border: none;
+  background: #a78bfa;
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+#leaderboardOverlay .lb-clear {
+  display: block;
+  margin: 8px auto 0;
+  padding: 4px 16px;
+  border-radius: 12px;
+  border: 1px solid #475569;
+  background: transparent;
+  color: #64748b;
+  font-size: 11px;
+  cursor: pointer;
+}
+#nameInput {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 250;
+}
+#nameInput .ni-content {
+  background: linear-gradient(135deg, #16213e, #0f3460);
+  border: 3px solid #fbbf24;
+  border-radius: 20px;
+  padding: 32px;
+  text-align: center;
+  color: #fff;
+}
+#nameInput h2 { font-size: 28px; color: #fbbf24; margin-bottom: 6px; }
+#nameInput .ni-sub { font-size: 14px; color: #ccc; margin-bottom: 16px; }
+#nameInput input {
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 2px solid #a78bfa;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  font-size: 18px;
+  text-align: center;
+  width: 220px;
+  outline: none;
+}
+#nameInput input::placeholder { color: #64748b; }
+#nameInput input:focus { border-color: #fbbf24; }
+#nameInput .ni-btn {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 10px 30px;
+  border-radius: 25px;
+  border: none;
+  background: #e94560;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+<div id="gameContainer">
+  <div id="topBar">
+    <h1>Gloop Lab</h1>
+    <div id="elementScroller"></div>
+    <div class="right-controls">
+      <span id="stars"></span>
+      <span id="timer"></span>
+      <button id="leaderboardBtn" onclick="showLeaderboard()">Leaderboard</button>
+      <button id="hintBtn" onclick="giveHint()">Hint</button>
+      <label id="answerToggle" style="display:none;font-size:10px;color:#64748b;cursor:pointer;white-space:nowrap;">
+        <input type="checkbox" id="showAnswers" style="cursor:pointer;"> Answers
+      </label>
+      <span id="deleteHint">2x click = delete</span>
+      <button id="clearBtn" onclick="clearBlobs()">Clear All</button>
+      <button class="mode-btn active" onclick="setMode('solo')" id="btnSolo">1P</button>
+      <button class="mode-btn" onclick="setMode('race')" id="btnRace">2P Race</button>
+      <button class="mode-btn" onclick="setMode('collab')" id="btnCollab">2P Co-op</button>
+    </div>
+  </div>
+  <div id="mainArea">
+    <canvas id="gameCanvas"></canvas>
+    <button id="journalToggle" onclick="toggleJournal()">&#9664;</button>
+    <div id="journal">
+      <h2>Discovery Journal</h2>
+      <div id="journalEntries"></div>
+    </div>
+  </div>
+</div>
+<div id="notification">
+  <h3>New Discovery!</h3>
+  <div class="formula-big" id="notifFormula"></div>
+  <p id="notifFact"></p>
+</div>
+<div id="winOverlay">
+  <div class="win-content">
+    <h2 id="winTitle">All Discovered!</h2>
+    <p id="winText"></p>
+    <button onclick="promptScoreSave()" style="margin-right:8px;background:#a78bfa;">Save Score</button>
+    <button onclick="resetGame()">Play Again</button>
+  </div>
+</div>
+<div id="toast"></div>
+<div id="infoPopup">
+  <div class="info-name" id="infoName"></div>
+  <div class="info-symbol" id="infoSymbol"></div>
+  <div class="info-fact" id="infoFact"></div>
+</div>
+<div id="hintPopup">
+  <h3>Try this combo!</h3>
+  <div class="hint-elements" id="hintElements"></div>
+  <div class="hint-result" id="hintResult"></div>
+</div>
+<div id="leaderboardOverlay">
+  <div class="lb-content">
+    <h2>Leaderboard</h2>
+    <div id="lbBody"></div>
+    <button class="lb-close" onclick="hideLeaderboard()">Close</button>
+    <button class="lb-clear" onclick="clearLeaderboard()">Clear All Scores</button>
+  </div>
+</div>
+<div id="nameInput">
+  <div class="ni-content">
+    <h2 id="niTitle">Great Job!</h2>
+    <div class="ni-sub" id="niSub"></div>
+    <input type="text" id="niField" placeholder="Your name" maxlength="20" autocomplete="off">
+    <br>
+    <button class="ni-btn" onclick="submitScore()">Save Score</button>
+  </div>
+</div>
+
+<script>
+// ============ DATA ============
+const ELEMENTS = [
+  { symbol: 'H',  name: 'Hydrogen',  color: '#60a5fa', fact: 'Lightest element!', num: 1, mass: 1.008, cat: 'Common' },
+  { symbol: 'He', name: 'Helium',    color: '#fde68a', fact: 'Makes balloons float!', num: 2, mass: 4.003, cat: 'Common' },
+  { symbol: 'C',  name: 'Carbon',    color: '#94a3b8', fact: 'Makes diamonds!', num: 6, mass: 12.011, cat: 'Common' },
+  { symbol: 'N',  name: 'Nitrogen',  color: '#c084fc', fact: '78% of air!', num: 7, mass: 14.007, cat: 'Common' },
+  { symbol: 'O',  name: 'Oxygen',    color: '#e2e8f0', fact: 'We breathe this!', num: 8, mass: 15.999, cat: 'Common' },
+  { symbol: 'F',  name: 'Fluorine',  color: '#a3e635', fact: 'In your toothpaste!', num: 9, mass: 18.998, cat: 'Common' },
+  { symbol: 'Ne', name: 'Neon',      color: '#fb923c', fact: 'Glows orange-red!', num: 10, mass: 20.180, cat: 'Common' },
+  { symbol: 'Na', name: 'Sodium',    color: '#fbbf24', fact: 'Makes things salty!', num: 11, mass: 22.990, cat: 'Common' },
+  { symbol: 'Mg', name: 'Magnesium', color: '#6ee7b7', fact: 'Burns super bright!', num: 12, mass: 24.305, cat: 'Common' },
+  { symbol: 'Al', name: 'Aluminum',  color: '#cbd5e1', fact: 'Soda cans!', num: 13, mass: 26.982, cat: 'Common' },
+  { symbol: 'Si', name: 'Silicon',   color: '#818cf8', fact: 'Makes computer chips!', num: 14, mass: 28.086, cat: 'Common' },
+  { symbol: 'P',  name: 'Phosphorus',color: '#f472b6', fact: 'Glows in the dark!', num: 15, mass: 30.974, cat: 'Common' },
+  { symbol: 'S',  name: 'Sulfur',    color: '#facc15', fact: 'Smells like eggs!', num: 16, mass: 32.065, cat: 'Common' },
+  { symbol: 'Cl', name: 'Chlorine',  color: '#4ade80', fact: 'Pool smell!', num: 17, mass: 35.453, cat: 'Common' },
+  { symbol: 'Ar', name: 'Argon',     color: '#7dd3fc', fact: 'Totally lazy gas!', num: 18, mass: 39.948, cat: 'Common' },
+  { symbol: 'K',  name: 'Potassium', color: '#d8b4fe', fact: 'Explodes in water!', num: 19, mass: 39.098, cat: 'Metals' },
+  { symbol: 'Ca', name: 'Calcium',   color: '#f9fafb', fact: 'Strong bones!', num: 20, mass: 40.078, cat: 'Metals' },
+  { symbol: 'Ti', name: 'Titanium',  color: '#a1a1aa', fact: 'Super strong & light!', num: 22, mass: 47.867, cat: 'Metals' },
+  { symbol: 'Cr', name: 'Chromium',  color: '#d4d4d8', fact: 'Makes things shiny!', num: 24, mass: 51.996, cat: 'Metals' },
+  { symbol: 'Fe', name: 'Iron',      color: '#f97316', fact: 'Makes blood red!', num: 26, mass: 55.845, cat: 'Metals' },
+  { symbol: 'Ni', name: 'Nickel',    color: '#a8a29e', fact: 'In coins!', num: 28, mass: 58.693, cat: 'Metals' },
+  { symbol: 'Cu', name: 'Copper',    color: '#f59e0b', fact: 'Turns green over time!', num: 29, mass: 63.546, cat: 'Metals' },
+  { symbol: 'Zn', name: 'Zinc',      color: '#9ca3af', fact: 'Stops rust!', num: 30, mass: 65.380, cat: 'Metals' },
+  { symbol: 'Ag', name: 'Silver',    color: '#e5e7eb', fact: 'Best conductor!', num: 47, mass: 107.868, cat: 'Metals' },
+  { symbol: 'Sn', name: 'Tin',       color: '#d1d5db', fact: 'Tin cans!', num: 50, mass: 118.710, cat: 'Metals' },
+  { symbol: 'Au', name: 'Gold',      color: '#fcd34d', fact: 'Shiny & rare!', num: 79, mass: 196.967, cat: 'Metals' },
+  { symbol: 'Pt', name: 'Platinum',  color: '#e2e8f0', fact: 'Rarer than gold!', num: 78, mass: 195.084, cat: 'Metals' },
+  { symbol: 'Pb', name: 'Lead',      color: '#71717a', fact: 'Super heavy!', num: 82, mass: 207.200, cat: 'Metals' },
+  { symbol: 'W',  name: 'Tungsten',  color: '#78716c', fact: 'Highest melting point!', num: 74, mass: 183.840, cat: 'Fun' },
+  { symbol: 'U',  name: 'Uranium',   color: '#84cc16', fact: 'Radioactive & green glow!', num: 92, mass: 238.029, cat: 'Fun' },
+];
+
+const COMPOUNDS = [
+  { inputs: ['H','O'],   name: 'Water',         formula: 'H\u2082O',     color: '#3b82f6', fact: 'Covers 71% of Earth!', visual: 'wavy' },
+  { inputs: ['H','H'],   name: 'H\u2082 Gas',   formula: 'H\u2082',     color: '#93c5fd', fact: 'Lighter than air!', visual: 'floaty' },
+  { inputs: ['H','N'],   name: 'Ammonia',        formula: 'NH\u2083',    color: '#a78bfa', fact: 'Smells super strong!', visual: 'wispy' },
+  { inputs: ['H','Cl'],  name: 'Stomach Acid',   formula: 'HCl',         color: '#bef264', fact: 'In your tummy!', visual: 'bubble' },
+  { inputs: ['H','C'],   name: 'Methane',        formula: 'CH\u2084',    color: '#86efac', fact: 'Cow burps make this!', visual: 'bubble' },
+  { inputs: ['H','F'],   name: 'Hydrofluoric',   formula: 'HF',          color: '#d9f99d', fact: 'Etches glass!', visual: 'bubble' },
+  { inputs: ['H','S'],   name: 'Rotten Eggs',    formula: 'H\u2082S',    color: '#a3a300', fact: 'Stinkiest compound!', visual: 'wispy' },
+  { inputs: ['C','O'],   name: 'CO\u2082 Fizz',  formula: 'CO\u2082',    color: '#9ca3af', fact: 'Makes soda bubbly!', visual: 'bubble' },
+  { inputs: ['N','O'],   name: 'Laughing Gas',    formula: 'N\u2082O',    color: '#f0abfc', fact: 'Makes you giggle!', visual: 'floaty' },
+  { inputs: ['Fe','O'],  name: 'Rust',            formula: 'Fe\u2082O\u2083', color: '#c2410c', fact: 'Iron + air + time!', visual: 'rough' },
+  { inputs: ['Na','O'],  name: 'Soda Ash',        formula: 'Na\u2082O',   color: '#fef3c7', fact: 'Used to make glass!', visual: 'sparkle' },
+  { inputs: ['Si','O'],  name: 'Glass',           formula: 'SiO\u2082',   color: '#bfdbfe', fact: 'Windows are made of this!', visual: 'sparkle' },
+  { inputs: ['Al','O'],  name: 'Ruby',            formula: 'Al\u2082O\u2083', color: '#f43f5e', fact: 'Red gemstone!', visual: 'sparkle' },
+  { inputs: ['Cu','O'],  name: 'Patina',          formula: 'CuO',         color: '#34d399', fact: 'Statue of Liberty color!', visual: 'rough' },
+  { inputs: ['Ca','O'],  name: 'Quickite',        formula: 'CaO',         color: '#fafafa', fact: 'Gets HOT with water!', visual: 'rough' },
+  { inputs: ['Mg','O'],  name: 'Magnesia',        formula: 'MgO',         color: '#f0fdf4', fact: 'Fireproof bricks!', visual: 'rough' },
+  { inputs: ['K','O'],   name: 'Potash',          formula: 'K\u2082O',    color: '#ede9fe', fact: 'Helps plants grow!', visual: 'sparkle' },
+  { inputs: ['Pb','O'],  name: 'Litharge',        formula: 'PbO',         color: '#eab308', fact: 'Yellow pigment!', visual: 'rough' },
+  { inputs: ['Ti','O'],  name: 'White Paint',     formula: 'TiO\u2082',   color: '#f8fafc', fact: 'Whitest white!', visual: 'sparkle' },
+  { inputs: ['Zn','O'],  name: 'Sunscreen',       formula: 'ZnO',         color: '#fefce8', fact: 'Blocks UV rays!', visual: 'sparkle' },
+  { inputs: ['Cr','O'],  name: 'Chrome Green',    formula: 'Cr\u2082O\u2083', color: '#16a34a', fact: 'Green pigment!', visual: 'shiny' },
+  { inputs: ['W','O'],   name: 'Tungsten Oxide',  formula: 'WO\u2083',    color: '#fde047', fact: 'Smart glass tint!', visual: 'shiny' },
+  { inputs: ['U','O'],   name: 'Yellowcake',      formula: 'UO\u2082',    color: '#a3e635', fact: 'Nuclear fuel!', visual: 'shiny' },
+  { inputs: ['Ni','O'],  name: 'Nickel Green',    formula: 'NiO',         color: '#22c55e', fact: 'Green pigment!', visual: 'rough' },
+  { inputs: ['Na','Cl'], name: 'Salt',            formula: 'NaCl',        color: '#f1f5f9', fact: 'Makes food tasty!', visual: 'sparkle' },
+  { inputs: ['Na','F'],  name: 'Toothpaste',      formula: 'NaF',         color: '#bbf7d0', fact: 'Protects your teeth!', visual: 'sparkle' },
+  { inputs: ['Na','S'],  name: 'Stink Salt',      formula: 'Na\u2082S',   color: '#fef08a', fact: 'Smells terrible!', visual: 'wispy' },
+  { inputs: ['Fe','C'],  name: 'Steel',           formula: 'FeC',         color: '#6b7280', fact: 'Builds skyscrapers!', visual: 'rough' },
+  { inputs: ['Fe','S'],  name: "Fool's Gold",     formula: 'FeS\u2082',   color: '#eab308', fact: 'Looks like gold but isn\'t!', visual: 'shiny' },
+  { inputs: ['Fe','Cr'], name: 'Stainless Steel', formula: 'FeCr',        color: '#e5e7eb', fact: 'Doesn\'t rust!', visual: 'shiny' },
+  { inputs: ['Fe','Ni'], name: 'Meteorite Metal', formula: 'FeNi',        color: '#a1a1aa', fact: 'From outer space!', visual: 'shiny' },
+  { inputs: ['Fe','Au'], name: 'Pirate Alloy',    formula: 'FeAu',        color: '#d97706', fact: 'Arr, shiny matey!', visual: 'shiny' },
+  { inputs: ['Cu','Sn'], name: 'Bronze',          formula: 'CuSn',        color: '#b45309', fact: 'Ancient weapon metal!', visual: 'shiny' },
+  { inputs: ['Cu','Zn'], name: 'Brass',           formula: 'CuZn',        color: '#ca8a04', fact: 'Trumpets & doorknobs!', visual: 'shiny' },
+  { inputs: ['Cu','S'],  name: 'Blue Crystal',    formula: 'CuS',         color: '#2563eb', fact: 'Deep blue mineral!', visual: 'sparkle' },
+  { inputs: ['Cu','Fe'], name: 'Chalcopyrite',    formula: 'CuFeS',       color: '#d97706', fact: 'Copper ore!', visual: 'shiny' },
+  { inputs: ['Au','Au'], name: 'Gold Bar',        formula: 'Au\u2082',    color: '#f59e0b', fact: 'Worth a fortune!', visual: 'shiny' },
+  { inputs: ['Au','Ag'], name: 'Electrum',        formula: 'AuAg',        color: '#fde68a', fact: 'Ancient money metal!', visual: 'shiny' },
+  { inputs: ['Ag','Cl'], name: 'Silver Chloride', formula: 'AgCl',        color: '#d1d5db', fact: 'Makes old photos!', visual: 'sparkle' },
+  { inputs: ['Ag','S'],  name: 'Tarnish',         formula: 'Ag\u2082S',   color: '#57534e', fact: 'Why silver gets dark!', visual: 'rough' },
+  { inputs: ['Ag','Ag'], name: 'Silver Bar',      formula: 'Ag\u2082',    color: '#e5e7eb', fact: 'Shiny treasure!', visual: 'shiny' },
+  { inputs: ['Au','Cu'], name: 'Rose Gold',       formula: 'AuCu',        color: '#fb7185', fact: 'Pretty pink metal!', visual: 'shiny' },
+  { inputs: ['Au','Pt'], name: 'Royal Alloy',     formula: 'AuPt',        color: '#fef3c7', fact: 'Fit for a king!', visual: 'shiny' },
+  { inputs: ['He','He'], name: 'Balloon Gas',     formula: 'He\u2082',    color: '#fef08a', fact: 'Float away!', visual: 'floaty' },
+  { inputs: ['N','N'],   name: 'N\u2082 Air',     formula: 'N\u2082',     color: '#ddd6fe', fact: 'Most of what you breathe!', visual: 'wispy' },
+  { inputs: ['Ne','Ne'], name: 'Neon Sign',       formula: 'Ne\u2082',    color: '#fb923c', fact: 'Bright neon glow!', visual: 'shiny' },
+  { inputs: ['Ar','Ar'], name: 'Argon Shield',    formula: 'Ar\u2082',    color: '#bae6fd', fact: 'Welding shield gas!', visual: 'wispy' },
+  { inputs: ['O','O'],   name: 'Ozone',           formula: 'O\u2083',     color: '#a5f3fc', fact: 'Protects from UV!', visual: 'wispy' },
+  { inputs: ['C','C'],   name: 'Diamond',         formula: 'C\u2082',     color: '#e0f2fe', fact: 'Hardest natural thing!', visual: 'sparkle' },
+  { inputs: ['C','N'],   name: 'Cyanide',         formula: 'CN',          color: '#67e8f9', fact: 'Smells like almonds!', visual: 'wispy' },
+  { inputs: ['Ca','C'],  name: 'Calcium Carbide', formula: 'CaC\u2082',   color: '#d6d3d1', fact: 'Makes sparks!', visual: 'sparkle' },
+  { inputs: ['Ca','F'],  name: 'Fluorite',        formula: 'CaF\u2082',   color: '#a78bfa', fact: 'Glows under UV!', visual: 'sparkle' },
+  { inputs: ['Pb','S'],  name: 'Galena',          formula: 'PbS',         color: '#52525b', fact: 'Shiny lead ore!', visual: 'shiny' },
+  { inputs: ['Pb','Sn'], name: 'Solder',          formula: 'PbSn',        color: '#a1a1aa', fact: 'Joins wires together!', visual: 'rough' },
+  { inputs: ['Si','C'],  name: 'Carborundum',     formula: 'SiC',         color: '#1e293b', fact: 'Almost hard as diamond!', visual: 'sparkle' },
+  { inputs: ['Mg','S'],  name: 'Epsom Salt',      formula: 'MgS',         color: '#f0fdf4', fact: 'Soak your feet in it!', visual: 'sparkle' },
+  { inputs: ['P','O'],   name: 'Phosphorus Glow', formula: 'P\u2082O\u2085', color: '#fda4af', fact: 'Glows in the dark!', visual: 'shiny' },
+  { inputs: ['Sn','O'],  name: 'Tin Oxide',       formula: 'SnO\u2082',   color: '#e2e8f0', fact: 'Touchscreen coating!', visual: 'sparkle' },
+  { inputs: ['K','Cl'],  name: 'Lo-Salt',         formula: 'KCl',         color: '#fef9c3', fact: 'Healthy salt!', visual: 'sparkle' },
+  { inputs: ['Ti','N'],  name: 'Gold Coating',    formula: 'TiN',         color: '#eab308', fact: 'Gold-colored but tough!', visual: 'shiny' },
+  { inputs: ['Ni','Cu'], name: 'Cupronickel',     formula: 'NiCu',        color: '#d6d3d1', fact: 'Coins are made of this!', visual: 'shiny' },
+  { inputs: ['W','C'],   name: 'Tungsten Carbide',formula: 'WC',          color: '#57534e', fact: 'Drill bit material!', visual: 'rough' },
+  { inputs: ['Pt','O'],  name: 'Plat Catalyst',   formula: 'PtO\u2082',   color: '#f0f0f0', fact: 'Cleans car exhaust!', visual: 'sparkle' },
+  { inputs: ['Zn','S'],  name: 'Glow Paint',      formula: 'ZnS',         color: '#d9f99d', fact: 'Glow-in-dark paint!', visual: 'shiny' },
+  { inputs: ['Al','Fe'], name: 'Thermite',        formula: 'AlFe',        color: '#ef4444', fact: 'Burns super hot!', visual: 'rough' },
+  { inputs: ['Mg','Al'], name: 'Magnalium',       formula: 'MgAl',        color: '#e2e8f0', fact: 'Firework sparkles!', visual: 'sparkle' },
+  { inputs: ['Cr','C'],  name: 'Chrome Steel',    formula: 'CrC',         color: '#a1a1aa', fact: 'Cuts through anything!', visual: 'shiny' },
+];
+
+const MAX_BLOBS = 60;
+const MAX_PARTICLES = 200;
+// The compound shelf takes up the bottom portion of the screen
+const SHELF_RATIO = 0.28; // bottom 28% is the compound shelf
+
+// ============ STATE ============
+let canvas, ctx;
+let blobs = [];
+let particles = [];
+let dragging = null;
+let dragOffsetX = 0, dragOffsetY = 0;
+let discoveredP1 = new Set();
+let discoveredP2 = new Set();
+let gameMode = 'solo';
+let raceTimer = 0;
+let raceStarted = false;
+let journalCollapsed = false;
+let canvasW = 800, canvasH = 600; // sensible defaults
+let pointers = new Map();
+let lastClickTime = 0;
+let lastClickBlob = null;
+let dragStartX = 0, dragStartY = 0;
+let didDrag = false;
+
+function getShelfY() { return Math.floor(canvasH * (1 - SHELF_RATIO)); }
+
+// ============ INIT ============
+function init() {
+  canvas = document.getElementById('gameCanvas');
+  ctx = canvas.getContext('2d');
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  createElementButtons();
+  buildJournal();
+  updateStars();
+
+  canvas.addEventListener('mousedown', onPointerDown);
+  canvas.addEventListener('mousemove', onPointerMove);
+  canvas.addEventListener('mouseup', onPointerUp);
+  canvas.addEventListener('touchstart', onTouchStart, { passive: false });
+  canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+  canvas.addEventListener('touchend', onTouchEnd, { passive: false });
+
+  // Enter key submits score
+  document.getElementById('niField').addEventListener('keydown', e => {
+    if (e.key === 'Enter') submitScore();
+  });
+
+  requestAnimationFrame(gameLoop);
+}
+
+function resizeCanvas() {
+  const mainArea = document.getElementById('mainArea');
+  const journalW = journalCollapsed ? 0 : 220;
+  canvasW = mainArea.clientWidth - journalW;
+  canvasH = mainArea.clientHeight;
+  if (canvasW < 100) canvasW = 100;
+  if (canvasH < 100) canvasH = 100;
+  canvas.width = canvasW;
+  canvas.height = canvasH;
+}
+
+function createElementButtons() {
+  const container = document.getElementById('elementScroller');
+  container.innerHTML = '';
+  let currentCat = '';
+  ELEMENTS.forEach(el => {
+    if (el.cat !== currentCat) {
+      currentCat = el.cat;
+      const label = document.createElement('span');
+      label.className = 'cat-label';
+      label.textContent = currentCat;
+      container.appendChild(label);
+    }
+    const btn = document.createElement('button');
+    btn.className = 'element-btn';
+    btn.style.background = `radial-gradient(circle at 35% 35%, ${lighten(el.color, 40)}, ${el.color})`;
+    btn.innerHTML = `<span class="atomic-num">${el.num}</span>${el.symbol}`;
+    btn.title = `${el.name} (#${el.num}) - ${el.fact}`;
+    btn.onclick = () => spawnElement(el);
+    container.appendChild(btn);
+  });
+}
+
+// ============ BLOBS ============
+function spawnElement(el, x, y) {
+  if (blobs.length >= MAX_BLOBS) {
+    showToast('Lab full! Double-click blobs to remove some.');
+    return;
+  }
+  const shelfY = getShelfY();
+  const r = 28 + Math.random() * 8;
+  const blob = {
+    x: x || 80 + Math.random() * (canvasW - 160),
+    y: y || 40 + Math.random() * (shelfY - 120),
+    vx: (Math.random() - 0.5) * 3,
+    vy: (Math.random() - 0.5) * 3,
+    r, baseR: r,
+    symbol: el.symbol,
+    name: el.name,
+    color: el.color,
+    fact: el.fact,
+    num: el.num || 0,
+    mass: el.mass || 0,
+    isCompound: false,
+    visual: null,
+    wobble: Math.random() * Math.PI * 2,
+    wobbleSpeed: 2 + Math.random() * 2,
+    wobbleAmp: 3,
+    eyeBlink: 0,
+    blinkTimer: Math.random() * 200,
+    player: 0,
+    age: 0,
+  };
+  blobs.push(blob);
+  if (gameMode === 'race' && !raceStarted) startRace();
+  return blob;
+}
+
+function spawnCompound(compound, x, y, player) {
+  const r = 30 + Math.random() * 6;
+  const blob = {
+    x, y,
+    vx: (Math.random() - 0.5) * 1.5,
+    vy: 1 + Math.random(), // nudge downward toward shelf
+    r, baseR: r,
+    symbol: compound.formula,
+    name: compound.name,
+    color: compound.color,
+    fact: compound.fact,
+    num: 0,
+    isCompound: true,
+    visual: compound.visual,
+    wobble: Math.random() * Math.PI * 2,
+    wobbleSpeed: 1.5 + Math.random() * 1.5,
+    wobbleAmp: 5,
+    eyeBlink: 0,
+    blinkTimer: Math.random() * 200,
+    player: player || 0,
+    age: 0,
+  };
+  blobs.push(blob);
+  return blob;
+}
+
+function deleteBlob(blob) {
+  const idx = blobs.indexOf(blob);
+  if (idx === -1) return;
+  for (let i = 0; i < 12; i++) {
+    particles.push(makeParticle(blob.x, blob.y, blob.color));
+  }
+  blobs.splice(idx, 1);
+}
+
+function clearBlobs() {
+  blobs = [];
+  particles = [];
+}
+
+// ============ COMPOUNDS ============
+function findCompound(sym1, sym2) {
+  return COMPOUNDS.find(c => {
+    const [a, b] = c.inputs;
+    return (a === sym1 && b === sym2) || (a === sym2 && b === sym1);
+  });
+}
+
+function mergeBlobs(b1, b2) {
+  const compound = findCompound(b1.symbol, b2.symbol);
+  if (!compound) {
+    const dx = b2.x - b1.x;
+    const dy = b2.y - b1.y;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    b1.vx -= (dx / dist) * 3;
+    b1.vy -= (dy / dist) * 3;
+    b2.vx += (dx / dist) * 3;
+    b2.vy += (dy / dist) * 3;
+    for (let i = 0; i < 6; i++) {
+      particles.push(makeParticle((b1.x + b2.x) / 2, (b1.y + b2.y) / 2, '#666'));
+    }
+    return;
+  }
+  const mx = (b1.x + b2.x) / 2;
+  const my = (b1.y + b2.y) / 2;
+  const player = b1.player || b2.player || 0;
+  blobs = blobs.filter(b => b !== b1 && b !== b2);
+  spawnCompound(compound, mx, my, player);
+  for (let i = 0; i < 15; i++) {
+    particles.push(makeParticle(mx, my, compound.color));
+  }
+  const key = compound.formula;
+  const journal = (gameMode === 'race' && player === 2) ? discoveredP2 : discoveredP1;
+  if (!journal.has(key)) {
+    journal.add(key);
+    showNotification(compound);
+    buildJournal();
+    updateStars();
+    checkWin();
+  }
+}
+
+// ============ PARTICLES ============
+function makeParticle(x, y, color) {
+  return {
+    x, y,
+    vx: (Math.random() - 0.5) * 7,
+    vy: (Math.random() - 0.5) * 7,
+    r: 2 + Math.random() * 3,
+    color,
+    life: 1,
+    decay: 0.025 + Math.random() * 0.02,
+  };
+}
+
+// ============ INPUT ============
+function getCanvasPos(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  return { x: clientX - rect.left, y: clientY - rect.top };
+}
+
+function findBlobAt(x, y) {
+  for (let i = blobs.length - 1; i >= 0; i--) {
+    const b = blobs[i];
+    const dx = b.x - x;
+    const dy = b.y - y;
+    if (dx * dx + dy * dy < b.r * b.r) return b;
+  }
+  return null;
+}
+
+function onPointerDown(e) {
+  const pos = getCanvasPos(e.clientX, e.clientY);
+  const blob = findBlobAt(pos.x, pos.y);
+  if (!blob) return;
+
+  const now = Date.now();
+  if (blob === lastClickBlob && now - lastClickTime < 350) {
+    deleteBlob(blob);
+    lastClickBlob = null;
+    lastClickTime = 0;
+    dragging = null;
+    return;
+  }
+  lastClickTime = now;
+  lastClickBlob = blob;
+
+  dragging = blob;
+  dragOffsetX = blob.x - pos.x;
+  dragOffsetY = blob.y - pos.y;
+  dragStartX = pos.x;
+  dragStartY = pos.y;
+  didDrag = false;
+  blob.wobbleAmp = 8;
+}
+
+function onPointerMove(e) {
+  if (!dragging) return;
+  const pos = getCanvasPos(e.clientX, e.clientY);
+  const dx = pos.x - dragStartX;
+  const dy = pos.y - dragStartY;
+  if (dx * dx + dy * dy > 64) didDrag = true; // moved > 8px
+  dragging.x = pos.x + dragOffsetX;
+  dragging.y = pos.y + dragOffsetY;
+  dragging.vx = 0;
+  dragging.vy = 0;
+}
+
+function onPointerUp(e) {
+  if (!dragging) return;
+  const draggedBlob = dragging;
+  const target = blobs.find(b => {
+    if (b === dragging) return false;
+    const dx = b.x - dragging.x;
+    const dy = b.y - dragging.y;
+    return Math.sqrt(dx * dx + dy * dy) < b.r + dragging.r;
+  });
+  if (target && !dragging.isCompound && !target.isCompound) {
+    mergeBlobs(dragging, target);
+  }
+  if (dragging) dragging.wobbleAmp = 3;
+  dragging = null;
+  // Show info popup on click (not drag)
+  if (!didDrag && blobs.includes(draggedBlob)) {
+    showInfoPopup(draggedBlob);
+  }
+}
+
+function onTouchStart(e) {
+  e.preventDefault();
+  for (const touch of e.changedTouches) {
+    const pos = getCanvasPos(touch.clientX, touch.clientY);
+    const blob = findBlobAt(pos.x, pos.y);
+    if (!blob) continue;
+
+    const now = Date.now();
+    if (blob === lastClickBlob && now - lastClickTime < 350) {
+      deleteBlob(blob);
+      lastClickBlob = null;
+      lastClickTime = 0;
+      continue;
+    }
+    lastClickTime = now;
+    lastClickBlob = blob;
+
+    pointers.set(touch.identifier, {
+      blob,
+      offsetX: blob.x - pos.x,
+      offsetY: blob.y - pos.y,
+    });
+    blob.wobbleAmp = 8;
+  }
+}
+
+function onTouchMove(e) {
+  e.preventDefault();
+  for (const touch of e.changedTouches) {
+    const ptr = pointers.get(touch.identifier);
+    if (!ptr) continue;
+    const pos = getCanvasPos(touch.clientX, touch.clientY);
+    ptr.blob.x = pos.x + ptr.offsetX;
+    ptr.blob.y = pos.y + ptr.offsetY;
+    ptr.blob.vx = 0;
+    ptr.blob.vy = 0;
+  }
+}
+
+function onTouchEnd(e) {
+  e.preventDefault();
+  for (const touch of e.changedTouches) {
+    const ptr = pointers.get(touch.identifier);
+    if (!ptr) continue;
+    const b = ptr.blob;
+    const target = blobs.find(other => {
+      if (other === b) return false;
+      const dx = other.x - b.x;
+      const dy = other.y - b.y;
+      return Math.sqrt(dx * dx + dy * dy) < other.r + b.r;
+    });
+    if (target && !b.isCompound && !target.isCompound) {
+      mergeBlobs(b, target);
+    }
+    b.wobbleAmp = 3;
+    pointers.delete(touch.identifier);
+  }
+}
+
+// ============ GAME MODES ============
+function setMode(mode) {
+  gameMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(mode === 'solo' ? 'btnSolo' : mode === 'race' ? 'btnRace' : 'btnCollab').classList.add('active');
+  document.getElementById('timer').style.display = mode === 'race' ? 'inline' : 'none';
+  resetGame();
+}
+
+function resetGame() {
+  blobs = [];
+  particles = [];
+  discoveredP1 = new Set();
+  discoveredP2 = new Set();
+  raceTimer = 0;
+  raceStarted = false;
+  document.getElementById('winOverlay').style.display = 'none';
+  document.getElementById('nameInput').style.display = 'none';
+  document.getElementById('answerToggle').style.display = 'none';
+  document.getElementById('showAnswers').checked = false;
+  scoreSubmitted = false;
+  raceTimer = 0;
+  buildJournal();
+  updateStars();
+}
+
+function startRace() { raceStarted = true; raceTimer = 0; }
+
+function checkWin() {
+  const total = COMPOUNDS.length;
+  if (gameMode === 'solo' || gameMode === 'collab') {
+    if (discoveredP1.size >= total) showWin(gameMode === 'collab' ? 'You Both Win!' : 'You Win!', `All ${total} compounds discovered!`);
+  } else if (gameMode === 'race') {
+    if (discoveredP1.size >= total) showWin('Player 1 Wins!', `Found all ${total} in ${formatTime(raceTimer)}!`);
+    else if (discoveredP2.size >= total) showWin('Player 2 Wins!', `Found all ${total} in ${formatTime(raceTimer)}!`);
+  }
+}
+
+function showWin(title, text) {
+  document.getElementById('winTitle').textContent = title;
+  document.getElementById('winText').textContent = text;
+  document.getElementById('winOverlay').style.display = 'flex';
+  // Prompt score save after a short delay
+  setTimeout(promptScoreSave, 800);
+}
+
+function formatTime(frames) {
+  const secs = Math.floor(frames / 60);
+  return `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+}
+
+// ============ UI ============
+function buildJournal() {
+  const container = document.getElementById('journalEntries');
+  let html = '';
+  if (gameMode === 'race') {
+    html += '<div style="color:#60a5fa;font-weight:bold;margin:4px 0 2px;font-size:12px;">Player 1</div>';
+    COMPOUNDS.forEach(c => { html += journalRow(c, discoveredP1.has(c.formula)); });
+    html += '<div style="color:#f87171;font-weight:bold;margin:8px 0 2px;font-size:12px;">Player 2</div>';
+    COMPOUNDS.forEach(c => { html += journalRow(c, discoveredP2.has(c.formula)); });
+  } else {
+    COMPOUNDS.forEach(c => { html += journalRow(c, discoveredP1.has(c.formula)); });
+  }
+  container.innerHTML = html;
+}
+
+function journalRow(compound, discovered) {
+  return `<div class="journal-entry ${discovered ? 'discovered' : ''}">
+    <div class="check">${discovered ? '\u2714' : ''}</div>
+    <div>
+      <span class="formula">${discovered ? compound.formula : '???'}</span>
+      <span>${discovered ? ' ' + compound.name : ''}</span>
+    </div>
+  </div>`;
+}
+
+function updateStars() {
+  const count = discoveredP1.size;
+  const starCount = Math.floor(count / 5);
+  document.getElementById('stars').textContent = '\u2B50'.repeat(Math.min(starCount, 10)) + ` ${count}/${COMPOUNDS.length}`;
+  checkAnswerToggle();
+}
+
+function toggleJournal() {
+  journalCollapsed = !journalCollapsed;
+  document.getElementById('journal').classList.toggle('collapsed', journalCollapsed);
+  document.getElementById('journalToggle').classList.toggle('collapsed', journalCollapsed);
+  document.getElementById('journalToggle').innerHTML = journalCollapsed ? '&#9654;' : '&#9664;';
+  setTimeout(resizeCanvas, 310);
+}
+
+let notifTimeout;
+function showNotification(compound) {
+  const el = document.getElementById('notification');
+  document.getElementById('notifFormula').textContent = `${compound.formula} - ${compound.name}`;
+  document.getElementById('notifFact').textContent = compound.fact;
+  el.classList.add('show');
+  clearTimeout(notifTimeout);
+  notifTimeout = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+let toastTimeout;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+let infoTimeout;
+function showInfoPopup(blob) {
+  const el = document.getElementById('infoPopup');
+  const rect = canvas.getBoundingClientRect();
+  // Position near the blob
+  let left = rect.left + blob.x + blob.r + 10;
+  let top = rect.top + blob.y - 40;
+  // Keep on screen
+  if (left + 220 > window.innerWidth) left = rect.left + blob.x - blob.r - 230;
+  if (top < 10) top = 10;
+  if (top + 100 > window.innerHeight) top = window.innerHeight - 110;
+
+  el.style.left = left + 'px';
+  el.style.top = top + 'px';
+
+  if (blob.isCompound) {
+    document.getElementById('infoName').textContent = blob.name;
+    document.getElementById('infoSymbol').textContent = blob.symbol;
+    document.getElementById('infoFact').textContent = blob.fact;
+  } else {
+    document.getElementById('infoName').textContent = blob.name;
+    document.getElementById('infoSymbol').textContent = `#${blob.num} \u2022 ${blob.symbol} \u2022 ${blob.mass} u`;
+    document.getElementById('infoFact').textContent = blob.fact;
+  }
+
+  el.classList.add('show');
+  clearTimeout(infoTimeout);
+  infoTimeout = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+let hintTimeout;
+function giveHint() {
+  const journal = discoveredP1;
+  const undiscovered = COMPOUNDS.filter(c => !journal.has(c.formula));
+  if (undiscovered.length === 0) {
+    showToast('You found them all!');
+    return;
+  }
+  const hint = undiscovered[Math.floor(Math.random() * undiscovered.length)];
+  const el1 = ELEMENTS.find(e => e.symbol === hint.inputs[0]);
+  const el2 = ELEMENTS.find(e => e.symbol === hint.inputs[1]);
+  const name1 = el1 ? el1.name : hint.inputs[0];
+  const name2 = el2 ? el2.name : hint.inputs[1];
+
+  const showAnswers = document.getElementById('showAnswers').checked;
+
+  const popup = document.getElementById('hintPopup');
+  document.getElementById('hintElements').textContent = `${hint.inputs[0]} + ${hint.inputs[1]}`;
+  if (showAnswers) {
+    document.getElementById('hintResult').textContent = `${name1} + ${name2} = ${hint.name} (${hint.formula})`;
+  } else {
+    document.getElementById('hintResult').textContent = `${name1} + ${name2} = ???`;
+  }
+  popup.classList.add('show');
+  clearTimeout(hintTimeout);
+  hintTimeout = setTimeout(() => popup.classList.remove('show'), 3500);
+}
+
+// Show the "Answers" toggle after 10+ discoveries (reward for effort)
+function checkAnswerToggle() {
+  const count = discoveredP1.size;
+  const toggle = document.getElementById('answerToggle');
+  if (count >= 10) {
+    toggle.style.display = 'inline-flex';
+    toggle.style.alignItems = 'center';
+    toggle.style.gap = '3px';
+  }
+}
+
+// ============ LEADERBOARD ============
+const LB_KEY = 'glooplab_leaderboard';
+
+function getLeaderboard() {
+  try { return JSON.parse(localStorage.getItem(LB_KEY)) || []; }
+  catch { return []; }
+}
+
+function saveLeaderboard(lb) {
+  localStorage.setItem(LB_KEY, JSON.stringify(lb));
+}
+
+function addScore(name, discoveries, timeFrames, mode) {
+  const lb = getLeaderboard();
+  const secs = Math.floor(timeFrames / 60);
+  lb.push({
+    name: name.trim() || 'Anonymous',
+    discoveries,
+    total: COMPOUNDS.length,
+    time: secs,
+    mode,
+    date: new Date().toLocaleDateString(),
+  });
+  // Sort: most discoveries first, then fastest time
+  lb.sort((a, b) => b.discoveries - a.discoveries || a.time - b.time);
+  // Keep top 20
+  if (lb.length > 20) lb.length = 20;
+  saveLeaderboard(lb);
+}
+
+function showLeaderboard() {
+  const lb = getLeaderboard();
+  const body = document.getElementById('lbBody');
+  if (lb.length === 0) {
+    body.innerHTML = '<div class="lb-empty">No scores yet!<br>Discover compounds to get on the board.</div>';
+  } else {
+    let html = '<table><tr><th>#</th><th>Name</th><th>Found</th><th>Time</th><th>Mode</th></tr>';
+    lb.forEach((entry, i) => {
+      const mins = Math.floor(entry.time / 60);
+      const secs = entry.time % 60;
+      const timeStr = `${mins}:${String(secs).padStart(2, '0')}`;
+      const medal = i === 0 ? '\uD83E\uDD47' : i === 1 ? '\uD83E\uDD48' : i === 2 ? '\uD83E\uDD49' : '';
+      html += `<tr><td class="rank">${medal || (i + 1)}</td>
+        <td class="lb-name">${escHtml(entry.name)}</td>
+        <td>${entry.discoveries}/${entry.total}</td>
+        <td>${timeStr}</td>
+        <td>${entry.mode || '1P'}</td></tr>`;
+    });
+    html += '</table>';
+    body.innerHTML = html;
+  }
+  document.getElementById('leaderboardOverlay').style.display = 'flex';
+}
+
+function hideLeaderboard() {
+  document.getElementById('leaderboardOverlay').style.display = 'none';
+}
+
+function clearLeaderboard() {
+  if (confirm('Clear all scores?')) {
+    localStorage.removeItem(LB_KEY);
+    showLeaderboard();
+  }
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// Track game start time for leaderboard
+let gameStartFrame = 0;
+let scoreSubmitted = false;
+
+function promptScoreSave() {
+  if (scoreSubmitted) return;
+  const count = discoveredP1.size;
+  if (count < 3) return; // need at least 3 to save
+  const elapsed = raceTimer || (performance.now() / (1000/60)); // rough frame count if not race
+  document.getElementById('niTitle').textContent = count >= COMPOUNDS.length ? 'You Found Them All!' : 'Save Your Score?';
+  document.getElementById('niSub').textContent = `${count}/${COMPOUNDS.length} compounds discovered`;
+  document.getElementById('niField').value = localStorage.getItem('glooplab_lastname') || '';
+  document.getElementById('nameInput').style.display = 'flex';
+  document.getElementById('niField').focus();
+}
+
+function submitScore() {
+  const name = document.getElementById('niField').value.trim() || 'Anonymous';
+  localStorage.setItem('glooplab_lastname', name);
+  const count = discoveredP1.size;
+  const modeLabel = gameMode === 'solo' ? '1P' : gameMode === 'race' ? 'Race' : 'Co-op';
+  addScore(name, count, raceTimer, modeLabel);
+  scoreSubmitted = true;
+  document.getElementById('nameInput').style.display = 'none';
+  showLeaderboard();
+}
+
+// ============ GAME LOOP ============
+function gameLoop() {
+  update();
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+function update() {
+  // Always count time once first element is spawned
+  if (blobs.length > 0) raceTimer++;
+  if (gameMode === 'race') document.getElementById('timer').textContent = formatTime(raceTimer);
+
+  const shelfY = getShelfY();
+
+  blobs.forEach(b => {
+    if (b === dragging) return;
+    let isTouchDragged = false;
+    pointers.forEach(ptr => { if (ptr.blob === b) isTouchDragged = true; });
+    if (isTouchDragged) return;
+
+    b.x += b.vx;
+    b.y += b.vy;
+    b.vx *= 0.993;
+    b.vy *= 0.993;
+    b.vy += 0.04; // gravity
+
+    if (b.visual === 'floaty') b.vy -= 0.09;
+
+    // --- ZONE BOUNDARIES ---
+    if (b.isCompound) {
+      // Compounds live in the shelf (bottom zone)
+      // Gently push them down into the shelf if above it
+      if (b.y < shelfY + b.r + 10) {
+        b.vy += 0.15; // stronger gravity to pull into shelf
+      }
+      // Hard floor at very bottom with generous buffer
+      const floor = canvasH - 20;
+      if (b.y + b.r > floor) {
+        b.y = floor - b.r;
+        b.vy = -Math.abs(b.vy) * 0.4;
+      }
+      // Ceiling of shelf (can't escape back up too far)
+      if (b.y - b.r < shelfY - 30) {
+        b.vy += 0.3;
+      }
+    } else {
+      // Elements stay in the top zone (mixing lab)
+      // Hard floor at the shelf divider line
+      if (b.y + b.r > shelfY - 5) {
+        b.y = shelfY - 5 - b.r;
+        b.vy = -Math.abs(b.vy) * 0.6;
+      }
+    }
+
+    // Side walls
+    if (b.x - b.r < 0) { b.x = b.r; b.vx = Math.abs(b.vx) * 0.8; }
+    if (b.x + b.r > canvasW) { b.x = canvasW - b.r; b.vx = -Math.abs(b.vx) * 0.8; }
+    // Ceiling
+    if (b.y - b.r < 0) { b.y = b.r; b.vy = Math.abs(b.vy) * 0.8; }
+
+    // HARD CLAMP - absolutely nothing goes below canvas
+    if (b.y + b.r > canvasH - 15) {
+      b.y = canvasH - 15 - b.r;
+      b.vy = -Math.abs(b.vy) * 0.3;
+    }
+
+    // Wobble
+    b.wobble += b.wobbleSpeed * 0.05;
+    b.wobbleAmp *= 0.995;
+    if (b.wobbleAmp < 2) b.wobbleAmp = 2;
+
+    // Blink
+    b.blinkTimer--;
+    if (b.blinkTimer <= 0) { b.eyeBlink = 8; b.blinkTimer = 150 + Math.random() * 150; }
+    if (b.eyeBlink > 0) b.eyeBlink--;
+    b.age++;
+  });
+
+  // Blob-blob collisions
+  const n = Math.min(blobs.length, 50);
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const a = blobs[i], b = blobs[j];
+      if (a === dragging || b === dragging) continue;
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const minDist = a.r + b.r;
+      if (dist < minDist && dist > 0) {
+        const overlap = (minDist - dist) / 2;
+        const nx = dx / dist;
+        const ny = dy / dist;
+        a.x -= nx * overlap;
+        a.y -= ny * overlap;
+        b.x += nx * overlap;
+        b.y += ny * overlap;
+        const dvx = b.vx - a.vx;
+        const dvy = b.vy - a.vy;
+        const dvn = dvx * nx + dvy * ny;
+        if (dvn < 0) {
+          a.vx += nx * dvn * 0.5;
+          a.vy += ny * dvn * 0.5;
+          b.vx -= nx * dvn * 0.5;
+          b.vy -= ny * dvn * 0.5;
+        }
+      }
+    }
+  }
+
+  // Particles
+  particles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.12;
+    p.vx *= 0.98;
+    p.life -= p.decay;
+  });
+  particles = particles.filter(p => p.life > 0);
+  if (particles.length > MAX_PARTICLES) particles = particles.slice(-MAX_PARTICLES);
+}
+
+// ============ DRAW ============
+function draw() {
+  ctx.clearRect(0, 0, canvasW, canvasH);
+  drawBackground();
+
+  const shelfY = getShelfY();
+
+  // --- Draw zone labels ---
+  ctx.font = 'bold 13px Segoe UI, sans-serif';
+  ctx.textAlign = 'left';
+
+  // Mixing Lab label
+  ctx.fillStyle = 'rgba(96, 165, 250, 0.35)';
+  ctx.fillText('\u2697 Mixing Lab', 12, 22);
+
+  // Compound Shelf label
+  ctx.fillStyle = 'rgba(233, 69, 96, 0.4)';
+  ctx.fillText('\u2728 Compound Collection', 12, shelfY + 18);
+
+  // --- Draw shelf divider ---
+  ctx.strokeStyle = 'rgba(233, 69, 96, 0.25)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([8, 6]);
+  ctx.beginPath();
+  ctx.moveTo(0, shelfY);
+  ctx.lineTo(canvasW, shelfY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Shelf background tint
+  ctx.fillStyle = 'rgba(233, 69, 96, 0.04)';
+  ctx.fillRect(0, shelfY, canvasW, canvasH - shelfY);
+
+  // Race mode split
+  if (gameMode === 'race') {
+    ctx.strokeStyle = 'rgba(233,69,96,0.3)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([10, 10]);
+    ctx.beginPath();
+    ctx.moveTo(canvasW / 2, 0);
+    ctx.lineTo(canvasW / 2, canvasH);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font = 'bold 14px Segoe UI, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(59,130,246,0.5)';
+    ctx.fillText('Player 1', canvasW * 0.25, 22);
+    ctx.fillStyle = 'rgba(239,68,68,0.5)';
+    ctx.fillText('Player 2', canvasW * 0.75, 22);
+  }
+
+  // Draw all blobs
+  blobs.forEach(drawBlob);
+
+  // Particles
+  particles.forEach(p => {
+    ctx.globalAlpha = p.life;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+}
+
+function drawBackground() {
+  const grad = ctx.createLinearGradient(0, 0, 0, canvasH);
+  grad.addColorStop(0, '#1a1a2e');
+  grad.addColorStop(1, '#16213e');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, canvasW, canvasH);
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < canvasW; x += 50) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvasH); ctx.stroke();
+  }
+  for (let y = 0; y < canvasH; y += 50) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvasW, y); ctx.stroke();
+  }
+}
+
+function drawBlob(b) {
+  const t = performance.now() * 0.001;
+  const wobX = Math.sin(b.wobble + t * b.wobbleSpeed) * b.wobbleAmp;
+  const wobY = Math.cos(b.wobble + t * b.wobbleSpeed * 0.7) * b.wobbleAmp;
+  const rx = Math.max(b.r + wobX, 14);
+  const ry = Math.max(b.r + wobY, 14);
+
+  ctx.save();
+  ctx.translate(b.x, b.y);
+
+  // Glow
+  ctx.shadowColor = b.color;
+  ctx.shadowBlur = b.isCompound ? 20 : 12;
+
+  // Main round blob body
+  ctx.fillStyle = createBlobGradient(b, rx, ry);
+  ctx.beginPath();
+  ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  if (b.isCompound) {
+    // --- COMPOUND STYLING ---
+    // Thick colored border
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Visual effects
+    if (b.visual === 'sparkle') drawSparkles(b, t);
+    if (b.visual === 'bubble') drawBubbles(b, t);
+    if (b.visual === 'shiny') drawShine(b, t);
+    if (b.visual === 'wavy') drawWaves(b, t);
+
+    // Molecule icon (two connected dots) top-left
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.beginPath();
+    ctx.arc(-rx * 0.5, -ry * 0.5, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(-rx * 0.32, -ry * 0.4, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(-rx * 0.5, -ry * 0.5);
+    ctx.lineTo(-rx * 0.32, -ry * 0.4);
+    ctx.stroke();
+  } else {
+    // --- ELEMENT STYLING (round, bubbly - no hexagon) ---
+    // Thin dashed border to look like a periodic table cell
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.ellipse(0, 0, rx + 3, ry + 3, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Atomic number top-left
+    if (b.num) {
+      ctx.fillStyle = 'rgba(255,255,255,0.45)';
+      ctx.font = `bold ${Math.min(rx, ry) * 0.28}px Segoe UI, sans-serif`;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText(b.num, -rx * 0.6, -ry * 0.65);
+    }
+  }
+
+  // Highlight bubble
+  ctx.fillStyle = 'rgba(255,255,255,0.22)';
+  ctx.beginPath();
+  ctx.ellipse(-rx * 0.2, -ry * 0.25, rx * 0.3, ry * 0.15, -0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Eyes
+  const eyeSpacing = rx * 0.22;
+  const eyeY = -ry * 0.05;
+  const eyeR = Math.min(rx, ry) * 0.1;
+  const blinkScale = b.eyeBlink > 0 ? 0.15 : 1;
+
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.ellipse(-eyeSpacing, eyeY, eyeR, eyeR * blinkScale, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(eyeSpacing, eyeY, eyeR, eyeR * blinkScale, 0, 0, Math.PI * 2); ctx.fill();
+
+  if (b.eyeBlink <= 0) {
+    ctx.fillStyle = '#1a1a2e';
+    const pr = eyeR * 0.5;
+    ctx.beginPath(); ctx.arc(-eyeSpacing + 0.5, eyeY + 0.5, pr, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(eyeSpacing + 0.5, eyeY + 0.5, pr, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // Smile
+  ctx.strokeStyle = '#1a1a2e';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(0, ry * 0.12, rx * 0.15, 0.2, Math.PI - 0.2);
+  ctx.stroke();
+
+  // Symbol text — centered in lower portion of blob
+  ctx.fillStyle = '#fff';
+  const fontSize = Math.min(rx, ry) * (b.isCompound ? 0.38 : 0.5);
+  ctx.font = `bold ${fontSize}px Segoe UI, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(b.symbol, 0, ry * 0.4);
+
+  // Compound name below symbol
+  if (b.isCompound) {
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = `${Math.min(rx, ry) * 0.2}px Segoe UI, sans-serif`;
+    ctx.fillText(b.name, 0, ry * 0.68);
+  }
+
+  ctx.restore();
+}
+
+function createBlobGradient(b, rx, ry) {
+  const grad = ctx.createRadialGradient(-rx * 0.2, -ry * 0.2, 0, 0, 0, Math.max(rx, ry));
+  grad.addColorStop(0, lighten(b.color, 30));
+  grad.addColorStop(0.6, b.color);
+  grad.addColorStop(1, darken(b.color, 30));
+  return grad;
+}
+
+function drawSparkles(b, t) {
+  for (let i = 0; i < 4; i++) {
+    const angle = (t * 2 + i * 1.57) % (Math.PI * 2);
+    const dist = b.r * 0.55;
+    const sx = Math.cos(angle) * dist;
+    const sy = Math.sin(angle) * dist;
+    ctx.fillStyle = `rgba(255,255,255,${0.3 + Math.sin(t * 3 + i) * 0.25})`;
+    drawSmallStar(sx, sy, 2 + Math.sin(t * 5 + i));
+  }
+}
+
+function drawBubbles(b, t) {
+  for (let i = 0; i < 3; i++) {
+    const phase = t * 1.5 + i * 2;
+    const bx = Math.sin(phase) * b.r * 0.35;
+    const by = -((phase * 18) % (b.r * 1.4)) + b.r * 0.4;
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(bx, by, 2 + Math.sin(i), 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+function drawShine(b, t) {
+  const angle = t * 0.5;
+  ctx.fillStyle = `rgba(255,255,200,${0.15 + Math.sin(t * 2) * 0.1})`;
+  drawSmallStar(Math.cos(angle) * b.r * 0.3, Math.sin(angle) * b.r * 0.3, 4);
+}
+
+function drawWaves(b, t) {
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+  ctx.lineWidth = 1.5;
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath();
+    const waveY = -b.r * 0.15 + i * b.r * 0.2;
+    for (let x = -b.r * 0.5; x < b.r * 0.5; x += 2) {
+      const y = waveY + Math.sin(x * 0.15 + t * 3 + i) * 2.5;
+      if (x === -b.r * 0.5) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+}
+
+function drawSmallStar(x, y, size) {
+  ctx.beginPath();
+  for (let i = 0; i < 4; i++) {
+    const angle = (i / 4) * Math.PI * 2;
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + Math.cos(angle) * size, y + Math.sin(angle) * size);
+  }
+  ctx.stroke();
+  ctx.fill();
+}
+
+// ============ COLOR UTILS ============
+function lighten(hex, pct) {
+  const rgb = hexToRgb(hex);
+  return `rgb(${Math.min(255, rgb.r + pct)},${Math.min(255, rgb.g + pct)},${Math.min(255, rgb.b + pct)})`;
+}
+function darken(hex, pct) {
+  const rgb = hexToRgb(hex);
+  return `rgb(${Math.max(0, rgb.r - pct)},${Math.max(0, rgb.g - pct)},${Math.max(0, rgb.b - pct)})`;
+}
+function hexToRgb(hex) {
+  hex = hex.replace('#', '');
+  return {
+    r: parseInt(hex.substr(0, 2), 16),
+    g: parseInt(hex.substr(2, 2), 16),
+    b: parseInt(hex.substr(4, 2), 16),
+  };
+}
+
+// ============ START ============
+window.onload = init;
+</script>
+</body>
+</html>
