@@ -513,36 +513,124 @@ canvas {
 <script>
 // ============ DATA ============
 const ELEMENTS = [
-  { symbol: 'H',  name: 'Hydrogen',  color: '#60a5fa', fact: 'Lightest element!', num: 1, mass: 1.008, cat: 'Common' },
-  { symbol: 'He', name: 'Helium',    color: '#fde68a', fact: 'Makes balloons float!', num: 2, mass: 4.003, cat: 'Common' },
-  { symbol: 'C',  name: 'Carbon',    color: '#94a3b8', fact: 'Makes diamonds!', num: 6, mass: 12.011, cat: 'Common' },
-  { symbol: 'N',  name: 'Nitrogen',  color: '#c084fc', fact: '78% of air!', num: 7, mass: 14.007, cat: 'Common' },
-  { symbol: 'O',  name: 'Oxygen',    color: '#e2e8f0', fact: 'We breathe this!', num: 8, mass: 15.999, cat: 'Common' },
-  { symbol: 'F',  name: 'Fluorine',  color: '#a3e635', fact: 'In your toothpaste!', num: 9, mass: 18.998, cat: 'Common' },
-  { symbol: 'Ne', name: 'Neon',      color: '#fb923c', fact: 'Glows orange-red!', num: 10, mass: 20.180, cat: 'Common' },
-  { symbol: 'Na', name: 'Sodium',    color: '#fbbf24', fact: 'Makes things salty!', num: 11, mass: 22.990, cat: 'Common' },
-  { symbol: 'Mg', name: 'Magnesium', color: '#6ee7b7', fact: 'Burns super bright!', num: 12, mass: 24.305, cat: 'Common' },
-  { symbol: 'Al', name: 'Aluminum',  color: '#cbd5e1', fact: 'Soda cans!', num: 13, mass: 26.982, cat: 'Common' },
-  { symbol: 'Si', name: 'Silicon',   color: '#818cf8', fact: 'Makes computer chips!', num: 14, mass: 28.086, cat: 'Common' },
-  { symbol: 'P',  name: 'Phosphorus',color: '#f472b6', fact: 'Glows in the dark!', num: 15, mass: 30.974, cat: 'Common' },
-  { symbol: 'S',  name: 'Sulfur',    color: '#facc15', fact: 'Smells like eggs!', num: 16, mass: 32.065, cat: 'Common' },
-  { symbol: 'Cl', name: 'Chlorine',  color: '#4ade80', fact: 'Pool smell!', num: 17, mass: 35.453, cat: 'Common' },
-  { symbol: 'Ar', name: 'Argon',     color: '#7dd3fc', fact: 'Totally lazy gas!', num: 18, mass: 39.948, cat: 'Common' },
-  { symbol: 'K',  name: 'Potassium', color: '#d8b4fe', fact: 'Explodes in water!', num: 19, mass: 39.098, cat: 'Metals' },
-  { symbol: 'Ca', name: 'Calcium',   color: '#f9fafb', fact: 'Strong bones!', num: 20, mass: 40.078, cat: 'Metals' },
-  { symbol: 'Ti', name: 'Titanium',  color: '#a1a1aa', fact: 'Super strong & light!', num: 22, mass: 47.867, cat: 'Metals' },
-  { symbol: 'Cr', name: 'Chromium',  color: '#d4d4d8', fact: 'Makes things shiny!', num: 24, mass: 51.996, cat: 'Metals' },
-  { symbol: 'Fe', name: 'Iron',      color: '#f97316', fact: 'Makes blood red!', num: 26, mass: 55.845, cat: 'Metals' },
-  { symbol: 'Ni', name: 'Nickel',    color: '#a8a29e', fact: 'In coins!', num: 28, mass: 58.693, cat: 'Metals' },
-  { symbol: 'Cu', name: 'Copper',    color: '#f59e0b', fact: 'Turns green over time!', num: 29, mass: 63.546, cat: 'Metals' },
-  { symbol: 'Zn', name: 'Zinc',      color: '#9ca3af', fact: 'Stops rust!', num: 30, mass: 65.380, cat: 'Metals' },
-  { symbol: 'Ag', name: 'Silver',    color: '#e5e7eb', fact: 'Best conductor!', num: 47, mass: 107.868, cat: 'Metals' },
-  { symbol: 'Sn', name: 'Tin',       color: '#d1d5db', fact: 'Tin cans!', num: 50, mass: 118.710, cat: 'Metals' },
-  { symbol: 'Au', name: 'Gold',      color: '#fcd34d', fact: 'Shiny & rare!', num: 79, mass: 196.967, cat: 'Metals' },
-  { symbol: 'Pt', name: 'Platinum',  color: '#e2e8f0', fact: 'Rarer than gold!', num: 78, mass: 195.084, cat: 'Metals' },
-  { symbol: 'Pb', name: 'Lead',      color: '#71717a', fact: 'Super heavy!', num: 82, mass: 207.200, cat: 'Metals' },
-  { symbol: 'W',  name: 'Tungsten',  color: '#78716c', fact: 'Highest melting point!', num: 74, mass: 183.840, cat: 'Fun' },
-  { symbol: 'U',  name: 'Uranium',   color: '#84cc16', fact: 'Radioactive & green glow!', num: 92, mass: 238.029, cat: 'Fun' },
+  { symbol: 'H', name: 'Hydrogen', color: '#E8F5FF', fact: 'Lightest element in the universe!', num: 1, mass: 1.008, cat: 'Common' },
+  { symbol: 'He', name: 'Helium', color: '#D4E8FF', fact: 'Makes balloons float and your voice squeaky!', num: 2, mass: 4.003, cat: 'Common' },
+  { symbol: 'Li', name: 'Lithium', color: '#FFB347', fact: 'Powers your phone battery!', num: 3, mass: 6.941, cat: 'Metals' },
+  { symbol: 'Be', name: 'Beryllium', color: '#98D8A0', fact: 'Found in emeralds!', num: 4, mass: 9.012, cat: 'Metals' },
+  { symbol: 'B', name: 'Boron', color: '#C4A882', fact: 'Makes slime stronger!', num: 5, mass: 10.81, cat: 'Exotic' },
+  { symbol: 'C', name: 'Carbon', color: '#4A4A4A', fact: 'Diamonds AND pencil lead are both carbon!', num: 6, mass: 12.011, cat: 'Common' },
+  { symbol: 'N', name: 'Nitrogen', color: '#A8D8EA', fact: '78% of the air you breathe!', num: 7, mass: 14.007, cat: 'Common' },
+  { symbol: 'O', name: 'Oxygen', color: '#FF6B6B', fact: 'Keeps you alive with every breath!', num: 8, mass: 15.999, cat: 'Common' },
+  { symbol: 'F', name: 'Fluorine', color: '#7BED7B', fact: 'Protects your teeth in toothpaste!', num: 9, mass: 18.998, cat: 'Common' },
+  { symbol: 'Ne', name: 'Neon', color: '#FF6EC7', fact: 'Makes those cool glowing signs!', num: 10, mass: 20.180, cat: 'Common' },
+  { symbol: 'Na', name: 'Sodium', color: '#FFD700', fact: 'Explodes when you drop it in water!', num: 11, mass: 22.990, cat: 'Common' },
+  { symbol: 'Mg', name: 'Magnesium', color: '#87CEAB', fact: 'Burns with a blinding white flame!', num: 12, mass: 24.305, cat: 'Common' },
+  { symbol: 'Al', name: 'Aluminum', color: '#C0C0C0', fact: 'Wraps your leftovers and builds airplanes!', num: 13, mass: 26.982, cat: 'Common' },
+  { symbol: 'Si', name: 'Silicon', color: '#8B7D6B', fact: 'The brain of every computer chip!', num: 14, mass: 28.086, cat: 'Common' },
+  { symbol: 'P', name: 'Phosphorus', color: '#FFFF99', fact: 'Glows in the dark — spooky!', num: 15, mass: 30.974, cat: 'Common' },
+  { symbol: 'S', name: 'Sulfur', color: '#FFD700', fact: 'Smells like rotten eggs — yuck!', num: 16, mass: 32.06, cat: 'Common' },
+  { symbol: 'Cl', name: 'Chlorine', color: '#00FF7F', fact: 'Keeps swimming pools clean!', num: 17, mass: 35.45, cat: 'Common' },
+  { symbol: 'Ar', name: 'Argon', color: '#B0C4DE', fact: 'The laziest element — never reacts!', num: 18, mass: 39.948, cat: 'Common' },
+  { symbol: 'K', name: 'Potassium', color: '#FFA500', fact: 'Bananas are full of it!', num: 19, mass: 39.098, cat: 'Metals' },
+  { symbol: 'Ca', name: 'Calcium', color: '#F5F5DC', fact: 'Makes your bones and teeth strong!', num: 20, mass: 40.078, cat: 'Metals' },
+  { symbol: 'Sc', name: 'Scandium', color: '#A9A9A9', fact: 'Used in lightweight sports equipment!', num: 21, mass: 44.956, cat: 'Metals' },
+  { symbol: 'Ti', name: 'Titanium', color: '#708090', fact: 'Stronger than steel but way lighter!', num: 22, mass: 47.867, cat: 'Metals' },
+  { symbol: 'V', name: 'Vanadium', color: '#778899', fact: 'Named after a Norse goddess of beauty!', num: 23, mass: 50.942, cat: 'Metals' },
+  { symbol: 'Cr', name: 'Chromium', color: '#B8B8B8', fact: 'Makes things shiny like chrome on a car!', num: 24, mass: 51.996, cat: 'Metals' },
+  { symbol: 'Mn', name: 'Manganese', color: '#9E9E9E', fact: 'Inside every alkaline battery!', num: 25, mass: 54.938, cat: 'Metals' },
+  { symbol: 'Fe', name: 'Iron', color: '#B7410E', fact: 'Makes your blood red!', num: 26, mass: 55.845, cat: 'Metals' },
+  { symbol: 'Co', name: 'Cobalt', color: '#0047AB', fact: 'Makes the most beautiful blue paint!', num: 27, mass: 58.933, cat: 'Metals' },
+  { symbol: 'Ni', name: 'Nickel', color: '#727272', fact: 'The US 5-cent coin is named after it!', num: 28, mass: 58.693, cat: 'Metals' },
+  { symbol: 'Cu', name: 'Copper', color: '#B87333', fact: 'Turns green when it gets old — like the Statue of Liberty!', num: 29, mass: 63.546, cat: 'Metals' },
+  { symbol: 'Zn', name: 'Zinc', color: '#7D7D7D', fact: 'Protects you from sunburns!', num: 30, mass: 65.38, cat: 'Metals' },
+  { symbol: 'Ga', name: 'Gallium', color: '#8C8C8C', fact: 'Melts in your hand like magic!', num: 31, mass: 69.723, cat: 'Metals' },
+  { symbol: 'Ge', name: 'Germanium', color: '#6A5ACD', fact: 'Helps fiber optic cables carry internet!', num: 32, mass: 72.630, cat: 'Exotic' },
+  { symbol: 'As', name: 'Arsenic', color: '#7B68EE', fact: 'Used to be called the King of Poisons!', num: 33, mass: 74.922, cat: 'Exotic' },
+  { symbol: 'Se', name: 'Selenium', color: '#8470FF', fact: 'Named after the Moon!', num: 34, mass: 78.971, cat: 'Exotic' },
+  { symbol: 'Br', name: 'Bromine', color: '#00E676', fact: 'One of only two liquid elements at room temp!', num: 35, mass: 79.904, cat: 'Exotic' },
+  { symbol: 'Kr', name: 'Krypton', color: '#87CEFA', fact: "Real element — but won't give you superpowers!", num: 36, mass: 83.798, cat: 'Exotic' },
+  { symbol: 'Rb', name: 'Rubidium', color: '#FF8C00', fact: 'Used in the most accurate clocks ever!', num: 37, mass: 85.468, cat: 'Metals' },
+  { symbol: 'Sr', name: 'Strontium', color: '#FF4500', fact: 'Makes fireworks burn bright red!', num: 38, mass: 87.62, cat: 'Metals' },
+  { symbol: 'Y', name: 'Yttrium', color: '#A0A0A0', fact: 'Named after a village in Sweden!', num: 39, mass: 88.906, cat: 'Metals' },
+  { symbol: 'Zr', name: 'Zirconium', color: '#B0B0B0', fact: 'Fake diamonds are made from this!', num: 40, mass: 91.224, cat: 'Metals' },
+  { symbol: 'Nb', name: 'Niobium', color: '#6E7B8B', fact: 'Named after a Greek goddess!', num: 41, mass: 92.906, cat: 'Metals' },
+  { symbol: 'Mo', name: 'Molybdenum', color: '#808080', fact: 'Makes steel super tough!', num: 42, mass: 95.95, cat: 'Metals' },
+  { symbol: 'Tc', name: 'Technetium', color: '#9370DB', fact: 'First element ever made in a lab!', num: 43, mass: 97, cat: 'Exotic' },
+  { symbol: 'Ru', name: 'Ruthenium', color: '#696969', fact: 'Named after Russia!', num: 44, mass: 101.07, cat: 'Metals' },
+  { symbol: 'Rh', name: 'Rhodium', color: '#C8C8C8', fact: 'More expensive than gold!', num: 45, mass: 102.91, cat: 'Metals' },
+  { symbol: 'Pd', name: 'Palladium', color: '#CCC0B0', fact: 'Cleans up car exhaust fumes!', num: 46, mass: 106.42, cat: 'Metals' },
+  { symbol: 'Ag', name: 'Silver', color: '#D3D3D3', fact: 'Best conductor of electricity ever!', num: 47, mass: 107.87, cat: 'Metals' },
+  { symbol: 'Cd', name: 'Cadmium', color: '#5F5F5F', fact: 'Makes bright yellow and red paints!', num: 48, mass: 112.41, cat: 'Metals' },
+  { symbol: 'In', name: 'Indium', color: '#8A8A8A', fact: 'Makes touchscreens work!', num: 49, mass: 114.82, cat: 'Metals' },
+  { symbol: 'Sn', name: 'Tin', color: '#A8A8A8', fact: 'Used to make tin cans and tin foil!', num: 50, mass: 118.71, cat: 'Metals' },
+  { symbol: 'Sb', name: 'Antimony', color: '#9B59B6', fact: 'Ancient Egyptians used it as eye makeup!', num: 51, mass: 121.76, cat: 'Exotic' },
+  { symbol: 'Te', name: 'Tellurium', color: '#8E44AD', fact: 'Named after Earth — "tellus" in Latin!', num: 52, mass: 127.60, cat: 'Exotic' },
+  { symbol: 'I', name: 'Iodine', color: '#2ECC40', fact: 'Turns purple when it becomes a gas!', num: 53, mass: 126.90, cat: 'Exotic' },
+  { symbol: 'Xe', name: 'Xenon', color: '#ADD8E6', fact: 'Used in the brightest headlights!', num: 54, mass: 131.29, cat: 'Exotic' },
+  { symbol: 'Cs', name: 'Cesium', color: '#FFB900', fact: 'Most reactive metal — mega explosion in water!', num: 55, mass: 132.91, cat: 'Metals' },
+  { symbol: 'Ba', name: 'Barium', color: '#98FB98', fact: 'Makes green fireworks!', num: 56, mass: 137.33, cat: 'Metals' },
+  { symbol: 'La', name: 'Lanthanum', color: '#FF69B4', fact: 'Kickstarts the rare earth family!', num: 57, mass: 138.91, cat: 'Rare' },
+  { symbol: 'Ce', name: 'Cerium', color: '#FF1493', fact: 'Sparks when you scratch it — flint lighters!', num: 58, mass: 140.12, cat: 'Rare' },
+  { symbol: 'Pr', name: 'Praseodymium', color: '#DB7093', fact: 'Makes super strong magnets!', num: 59, mass: 140.91, cat: 'Rare' },
+  { symbol: 'Nd', name: 'Neodymium', color: '#C71585', fact: 'The strongest permanent magnets ever!', num: 60, mass: 144.24, cat: 'Rare' },
+  { symbol: 'Pm', name: 'Promethium', color: '#FF6EB4', fact: 'Named after the Greek Titan who stole fire!', num: 61, mass: 145, cat: 'Rare' },
+  { symbol: 'Sm', name: 'Samarium', color: '#EE82EE', fact: 'Named after a Russian mining engineer!', num: 62, mass: 150.36, cat: 'Rare' },
+  { symbol: 'Eu', name: 'Europium', color: '#DA70D6', fact: 'Makes euro banknotes glow to stop fakers!', num: 63, mass: 151.96, cat: 'Rare' },
+  { symbol: 'Gd', name: 'Gadolinium', color: '#BA55D3', fact: 'Helps MRI machines see inside your body!', num: 64, mass: 157.25, cat: 'Rare' },
+  { symbol: 'Tb', name: 'Terbium', color: '#9932CC', fact: 'Makes green phosphors in your TV screen!', num: 65, mass: 158.93, cat: 'Rare' },
+  { symbol: 'Dy', name: 'Dysprosium', color: '#8B008B', fact: 'Its name means "hard to get" in Greek!', num: 66, mass: 162.50, cat: 'Rare' },
+  { symbol: 'Ho', name: 'Holmium', color: '#FF00FF', fact: 'Has the strongest magnetic field of any element!', num: 67, mass: 164.93, cat: 'Rare' },
+  { symbol: 'Er', name: 'Erbium', color: '#FF77FF', fact: 'Makes pink-tinted glass and lasers!', num: 68, mass: 167.26, cat: 'Rare' },
+  { symbol: 'Tm', name: 'Thulium', color: '#D8BFD8', fact: 'Rarest naturally occurring rare earth!', num: 69, mass: 168.93, cat: 'Rare' },
+  { symbol: 'Yb', name: 'Ytterbium', color: '#DDA0DD', fact: 'Used in super precise atomic clocks!', num: 70, mass: 173.05, cat: 'Rare' },
+  { symbol: 'Lu', name: 'Lutetium', color: '#E0B0FF', fact: 'Named after Lutetia, the old name for Paris!', num: 71, mass: 174.97, cat: 'Rare' },
+  { symbol: 'Hf', name: 'Hafnium', color: '#6B6B6B', fact: 'Used in nuclear submarine reactors!', num: 72, mass: 178.49, cat: 'Metals' },
+  { symbol: 'Ta', name: 'Tantalum', color: '#5B5B5B', fact: 'Inside every smartphone and laptop!', num: 73, mass: 180.95, cat: 'Metals' },
+  { symbol: 'W', name: 'Tungsten', color: '#4B4B4B', fact: 'Highest melting point of any element!', num: 74, mass: 183.84, cat: 'Metals' },
+  { symbol: 'Re', name: 'Rhenium', color: '#616161', fact: 'One of the rarest metals on Earth!', num: 75, mass: 186.21, cat: 'Metals' },
+  { symbol: 'Os', name: 'Osmium', color: '#3B3B3B', fact: 'Densest element — heavier than lead!', num: 76, mass: 190.23, cat: 'Metals' },
+  { symbol: 'Ir', name: 'Iridium', color: '#4A4A5A', fact: 'Arrived on the asteroid that wiped out the dinos!', num: 77, mass: 192.22, cat: 'Metals' },
+  { symbol: 'Pt', name: 'Platinum', color: '#E5E4E2', fact: 'Rarer and pricier than gold!', num: 78, mass: 195.08, cat: 'Metals' },
+  { symbol: 'Au', name: 'Gold', color: '#FFD700', fact: 'So soft you can shape it with your hands!', num: 79, mass: 196.97, cat: 'Metals' },
+  { symbol: 'Hg', name: 'Mercury', color: '#7F7F7F', fact: 'Only metal that is liquid at room temperature!', num: 80, mass: 200.59, cat: 'Exotic' },
+  { symbol: 'Tl', name: 'Thallium', color: '#483D8B', fact: 'Was once used in rat poison!', num: 81, mass: 204.38, cat: 'Exotic' },
+  { symbol: 'Pb', name: 'Lead', color: '#4F4F4F', fact: 'So heavy it blocks X-rays!', num: 82, mass: 207.2, cat: 'Metals' },
+  { symbol: 'Bi', name: 'Bismuth', color: '#E6A8D7', fact: 'Makes rainbow-colored staircase crystals!', num: 83, mass: 208.98, cat: 'Metals' },
+  { symbol: 'Po', name: 'Polonium', color: '#7E57C2', fact: 'Discovered by Marie Curie!', num: 84, mass: 209, cat: 'Exotic' },
+  { symbol: 'At', name: 'Astatine', color: '#5C6BC0', fact: 'Rarest naturally occurring element!', num: 85, mass: 210, cat: 'Exotic' },
+  { symbol: 'Rn', name: 'Radon', color: '#9FA8DA', fact: 'Invisible radioactive gas — homes get tested for it!', num: 86, mass: 222, cat: 'Exotic' },
+  { symbol: 'Fr', name: 'Francium', color: '#FF6F00', fact: 'Most unstable natural element — gone in minutes!', num: 87, mass: 223, cat: 'Metals' },
+  { symbol: 'Ra', name: 'Radium', color: '#76FF03', fact: 'Glows in the dark — Marie Curie discovered it!', num: 88, mass: 226, cat: 'Metals' },
+  { symbol: 'Ac', name: 'Actinium', color: '#64DD17', fact: 'Glows blue in the dark!', num: 89, mass: 227, cat: 'Heavy' },
+  { symbol: 'Th', name: 'Thorium', color: '#76FF03', fact: 'Could power nuclear reactors for 1000 years!', num: 90, mass: 232.04, cat: 'Heavy' },
+  { symbol: 'Pa', name: 'Protactinium', color: '#69F0AE', fact: 'One of the rarest elements on Earth!', num: 91, mass: 231.04, cat: 'Heavy' },
+  { symbol: 'U', name: 'Uranium', color: '#00E676', fact: 'Powers nuclear submarines and reactors!', num: 92, mass: 238.03, cat: 'Heavy' },
+  { symbol: 'Np', name: 'Neptunium', color: '#00C853', fact: 'Named after the planet Neptune!', num: 93, mass: 237, cat: 'Heavy' },
+  { symbol: 'Pu', name: 'Plutonium', color: '#00BFA5', fact: 'Powered the Voyager space probes!', num: 94, mass: 244, cat: 'Heavy' },
+  { symbol: 'Am', name: 'Americium', color: '#1DE9B6', fact: 'Inside your smoke detector at home!', num: 95, mass: 243, cat: 'Heavy' },
+  { symbol: 'Cm', name: 'Curium', color: '#A7FFEB', fact: 'Named after Marie and Pierre Curie!', num: 96, mass: 247, cat: 'Heavy' },
+  { symbol: 'Bk', name: 'Berkelium', color: '#B2FF59', fact: 'Named after Berkeley, California!', num: 97, mass: 247, cat: 'Heavy' },
+  { symbol: 'Cf', name: 'Californium', color: '#CCFF90', fact: 'One gram costs $27 million!', num: 98, mass: 251, cat: 'Heavy' },
+  { symbol: 'Es', name: 'Einsteinium', color: '#F4FF81', fact: 'Named after Albert Einstein!', num: 99, mass: 252, cat: 'Heavy' },
+  { symbol: 'Fm', name: 'Fermium', color: '#EEFF41', fact: 'Named after Enrico Fermi — nuclear pioneer!', num: 100, mass: 257, cat: 'Heavy' },
+  { symbol: 'Md', name: 'Mendelevium', color: '#C6FF00', fact: 'Named after the creator of the periodic table!', num: 101, mass: 258, cat: 'Heavy' },
+  { symbol: 'No', name: 'Nobelium', color: '#AEEA00', fact: 'Named after Alfred Nobel — inventor of dynamite!', num: 102, mass: 259, cat: 'Heavy' },
+  { symbol: 'Lr', name: 'Lawrencium', color: '#64DD17', fact: 'Named after Ernest Lawrence — cyclotron inventor!', num: 103, mass: 266, cat: 'Heavy' },
+  { symbol: 'Rf', name: 'Rutherfordium', color: '#311B92', fact: 'Named after Ernest Rutherford!', num: 104, mass: 267, cat: 'Exotic' },
+  { symbol: 'Db', name: 'Dubnium', color: '#4527A0', fact: 'Named after Dubna, Russia!', num: 105, mass: 268, cat: 'Exotic' },
+  { symbol: 'Sg', name: 'Seaborgium', color: '#512DA8', fact: 'Named after Glenn Seaborg while he was still alive!', num: 106, mass: 269, cat: 'Exotic' },
+  { symbol: 'Bh', name: 'Bohrium', color: '#5E35B1', fact: 'Named after Niels Bohr — quantum physics legend!', num: 107, mass: 270, cat: 'Exotic' },
+  { symbol: 'Hs', name: 'Hassium', color: '#673AB7', fact: 'Named after the German state of Hesse!', num: 108, mass: 277, cat: 'Exotic' },
+  { symbol: 'Mt', name: 'Meitnerium', color: '#7C4DFF', fact: 'Named after Lise Meitner — nuclear fission discoverer!', num: 109, mass: 278, cat: 'Exotic' },
+  { symbol: 'Ds', name: 'Darmstadtium', color: '#651FFF', fact: 'Named after the city of Darmstadt, Germany!', num: 110, mass: 281, cat: 'Exotic' },
+  { symbol: 'Rg', name: 'Roentgenium', color: '#6200EA', fact: 'Named after Wilhelm Roentgen — discoverer of X-rays!', num: 111, mass: 282, cat: 'Exotic' },
+  { symbol: 'Cn', name: 'Copernicium', color: '#534BAE', fact: 'Named after Copernicus — Sun-centered solar system guy!', num: 112, mass: 285, cat: 'Exotic' },
+  { symbol: 'Nh', name: 'Nihonium', color: '#3D5AFE', fact: 'Named after Japan — "Nihon" in Japanese!', num: 113, mass: 286, cat: 'Exotic' },
+  { symbol: 'Fl', name: 'Flerovium', color: '#304FFE', fact: 'Named after a Russian physics lab!', num: 114, mass: 289, cat: 'Exotic' },
+  { symbol: 'Mc', name: 'Moscovium', color: '#2962FF', fact: 'Named after Moscow, Russia!', num: 115, mass: 290, cat: 'Exotic' },
+  { symbol: 'Lv', name: 'Livermorium', color: '#1A237E', fact: 'Named after Livermore, California!', num: 116, mass: 293, cat: 'Exotic' },
+  { symbol: 'Ts', name: 'Tennessine', color: '#0D47A1', fact: 'Named after Tennessee — newest halogen!', num: 117, mass: 294, cat: 'Exotic' },
+  { symbol: 'Og', name: 'Oganesson', color: '#01579B', fact: 'Heaviest element ever — only a few atoms made!', num: 118, mass: 294, cat: 'Exotic' },
 ];
 
 const COMPOUNDS = [
@@ -613,6 +701,169 @@ const COMPOUNDS = [
   { inputs: ['Al','Fe'], name: 'Thermite',        formula: 'AlFe',        color: '#ef4444', fact: 'Burns super hot!', visual: 'rough' },
   { inputs: ['Mg','Al'], name: 'Magnalium',       formula: 'MgAl',        color: '#e2e8f0', fact: 'Firework sparkles!', visual: 'sparkle' },
   { inputs: ['Cr','C'],  name: 'Chrome Steel',    formula: 'CrC',         color: '#a1a1aa', fact: 'Cuts through anything!', visual: 'shiny' },
+
+
+  // Lithium compounds
+  { inputs: ['Li','H'], name: 'Lithium Hydride', formula: 'LiH', color: '#FFD4A8', fact: 'Rocket fuel ingredient — to the moon!', visual: 'sparkle' },
+  { inputs: ['Li','O'], name: 'Lithium Oxide', formula: 'Li₂O', color: '#FFE0C0', fact: 'Used in special super-strong glass!', visual: 'shiny' },
+  { inputs: ['Li','F'], name: 'Lithium Fluoride', formula: 'LiF', color: '#E0FFE0', fact: 'Used to make UV light lenses!', visual: 'sparkle' },
+  { inputs: ['Li','Cl'], name: 'Lithium Chloride', formula: 'LiCl', color: '#FFE8D0', fact: 'Can suck moisture right out of the air!', visual: 'wispy' },
+
+  // Beryllium compounds
+  { inputs: ['Be','O'], name: 'Beryllium Oxide', formula: 'BeO', color: '#F0FFF0', fact: 'Conducts heat like metal but insulates electricity!', visual: 'rough' },
+  { inputs: ['Be','Al'], name: 'Beryllium Aluminum Alloy', formula: 'BeAl', color: '#D0D0C0', fact: 'Lighter than aluminum, stiffer than steel!', visual: 'shiny' },
+
+  // Bromine compounds
+  { inputs: ['Br','Na'], name: 'Sodium Bromide', formula: 'NaBr', color: '#E8FFE8', fact: 'Used in old-timey medicine as a sedative!', visual: 'bubble' },
+  { inputs: ['Br','K'], name: 'Potassium Bromide', formula: 'KBr', color: '#F0FFE0', fact: 'Used in old photography film!', visual: 'rough' },
+  { inputs: ['Br','Ag'], name: 'Silver Bromide', formula: 'AgBr', color: '#FFFFD0', fact: 'Made old camera film work!', visual: 'sparkle' },
+  { inputs: ['Br','H'], name: 'Hydrogen Bromide', formula: 'HBr', color: '#D0FFD0', fact: 'Super strong acid when dissolved in water!', visual: 'bubble' },
+
+  // Iodine compounds
+  { inputs: ['I','K'], name: 'Potassium Iodide', formula: 'KI', color: '#FFE4B5', fact: 'Added to table salt to keep your thyroid healthy!', visual: 'rough' },
+  { inputs: ['I','Na'], name: 'Sodium Iodide', formula: 'NaI', color: '#FFDAB9', fact: 'Glows when radiation hits it — used in detectors!', visual: 'sparkle' },
+  { inputs: ['I','H'], name: 'Hydrogen Iodide', formula: 'HI', color: '#C0FFC0', fact: 'One of the strongest acids known!', visual: 'bubble' },
+  { inputs: ['I','Ag'], name: 'Silver Iodide', formula: 'AgI', color: '#FFFFE0', fact: 'Shot into clouds to make rain — cloud seeding!', visual: 'wispy' },
+
+  // Xenon compounds (noble gas!)
+  { inputs: ['Xe','F'], name: 'Xenon Difluoride', formula: 'XeF₂', color: '#E0E8FF', fact: 'Noble gases are NOT supposed to bond — but xenon does!', visual: 'sparkle' },
+  { inputs: ['Xe','O'], name: 'Xenon Trioxide', formula: 'XeO₃', color: '#D0D8FF', fact: 'Explosive noble gas compound — handle with care!', visual: 'sparkle' },
+
+  // Germanium compounds
+  { inputs: ['Ge','O'], name: 'Germanium Dioxide', formula: 'GeO₂', color: '#E8E0FF', fact: 'Used in fiber optic cables for super-fast internet!', visual: 'sparkle' },
+  { inputs: ['Ge','H'], name: 'Germane', formula: 'GeH₄', color: '#F0E8FF', fact: 'A gas used to make computer chips!', visual: 'wispy' },
+
+  // Gallium Arsenide (LEDs!)
+  { inputs: ['As','Ga'], name: 'Gallium Arsenide', formula: 'GaAs', color: '#4A00E0', fact: 'Makes LEDs and lasers glow — in every phone screen!', visual: 'sparkle' },
+  { inputs: ['As','H'], name: 'Arsine', formula: 'AsH₃', color: '#B0A0FF', fact: 'Used to make super-pure semiconductors!', visual: 'wispy' },
+
+  // Selenium compounds
+  { inputs: ['Se','H'], name: 'Hydrogen Selenide', formula: 'H₂Se', color: '#FFB0FF', fact: 'Smells even worse than rotten eggs!', visual: 'wispy' },
+  { inputs: ['Se','Na'], name: 'Sodium Selenide', formula: 'Na₂Se', color: '#FFC0E0', fact: 'Selenium is essential for your health in tiny amounts!', visual: 'rough' },
+  { inputs: ['Se','Cd'], name: 'Cadmium Selenide', formula: 'CdSe', color: '#FF4500', fact: 'Makes quantum dots — tiny particles that glow any color!', visual: 'sparkle' },
+
+  // Molybdenum compounds
+  { inputs: ['Mo','S'], name: 'Molybdenite', formula: 'MoS₂', color: '#2F4F4F', fact: 'Slipperiest mineral — better lubricant than oil!', visual: 'shiny' },
+  { inputs: ['Mo','O'], name: 'Molybdenum Trioxide', formula: 'MoO₃', color: '#B0C4DE', fact: 'Helps plants grab nitrogen from the soil!', visual: 'rough' },
+
+  // Cobalt compounds
+  { inputs: ['Co','O'], name: 'Cobalt Blue', formula: 'CoO', color: '#0047AB', fact: 'The secret behind the world\'s most famous blue pigment!', visual: 'shiny' },
+  { inputs: ['Co','S'], name: 'Cobalt Sulfide', formula: 'CoS', color: '#003380', fact: 'A sparkly mineral found deep in the earth!', visual: 'sparkle' },
+
+  // Manganese compounds
+  { inputs: ['Mn','O'], name: 'Manganese Dioxide', formula: 'MnO₂', color: '#2F2F2F', fact: 'Inside every alkaline battery!', visual: 'rough' },
+  { inputs: ['Mn','K'], name: 'Potassium Permanganate', formula: 'KMnO₄', color: '#8B008B', fact: 'Makes water turn deep purple — like magic!', visual: 'floaty' },
+
+  // Bismuth compounds
+  { inputs: ['Bi','O'], name: 'Bismuth Oxide', formula: 'Bi₂O₃', color: '#FFD1EC', fact: 'Makes rainbow crystals that look like tiny staircases!', visual: 'sparkle' },
+  { inputs: ['Bi','S'], name: 'Bismuth Sulfide', formula: 'Bi₂S₃', color: '#4A3B5E', fact: 'A shimmery mineral found in hot springs!', visual: 'shiny' },
+
+  // Thorium compounds
+  { inputs: ['Th','O'], name: 'Thorium Oxide', formula: 'ThO₂', color: '#C8FFC8', fact: 'Was used in camping lantern mantles for super bright light!', visual: 'sparkle' },
+
+  // Uranium compounds
+  { inputs: ['U','F'], name: 'Uranium Hexafluoride', formula: 'UF₆', color: '#7FFF00', fact: 'Used to enrich uranium for power plants!', visual: 'wispy' },
+
+  // Titanium compounds
+  { inputs: ['Ti','C'], name: 'Titanium Carbide', formula: 'TiC', color: '#4A4A4A', fact: 'Almost as hard as diamond!', visual: 'rough' },
+
+  // Chromium compounds
+
+  // Vanadium compounds
+  { inputs: ['V','O'], name: 'Vanadium Pentoxide', formula: 'V₂O₅', color: '#FF8C00', fact: 'Changes color like a chameleon when heated!', visual: 'sparkle' },
+
+  // Nickel compounds
+
+  // Zinc compounds
+
+  // Copper compounds (more)
+
+  // Silver compounds
+  { inputs: ['Ag','N'], name: 'Silver Nitrate', formula: 'AgNO₃', color: '#D0D0D0', fact: 'Stains your skin black on contact!', visual: 'floaty' },
+
+  // Gold compounds
+  { inputs: ['Au','Cl'], name: 'Gold Chloride', formula: 'AuCl₃', color: '#FF4500', fact: 'Red-colored gold compound used in stained glass!', visual: 'sparkle' },
+
+  // Platinum compounds
+  { inputs: ['Pt','Cl'], name: 'Cisplatin', formula: 'PtCl₂', color: '#FFD700', fact: 'A platinum medicine that fights cancer!', visual: 'sparkle' },
+
+  // Tungsten compounds
+
+  // Osmium compounds
+  { inputs: ['Os','O'], name: 'Osmium Tetroxide', formula: 'OsO₄', color: '#C0C0C0', fact: 'Smells terrible but helps scientists see tiny things!', visual: 'wispy' },
+
+  // Tin compounds
+
+  // Barium compounds
+  { inputs: ['Ba','S'], name: 'Barium Sulfate', formula: 'BaSO₄', color: '#FFFFFF', fact: 'Drink it to make your insides show on X-rays!', visual: 'rough' },
+  { inputs: ['Ba','O'], name: 'Barium Oxide', formula: 'BaO', color: '#F0FFF0', fact: 'Used to make special optical glass!', visual: 'shiny' },
+
+  // Strontium compounds
+  { inputs: ['Sr','O'], name: 'Strontium Oxide', formula: 'SrO', color: '#FFE4E1', fact: 'Used in old-school color TV screens!', visual: 'sparkle' },
+  { inputs: ['Sr','S'], name: 'Strontium Sulfide', formula: 'SrS', color: '#FF6347', fact: 'Glows red after you charge it with light!', visual: 'sparkle' },
+
+  // Rubidium compounds
+  { inputs: ['Rb','O'], name: 'Rubidium Oxide', formula: 'Rb₂O', color: '#FFD080', fact: 'Used in night vision goggles!', visual: 'sparkle' },
+
+  // Cesium compounds
+  { inputs: ['Cs','F'], name: 'Cesium Fluoride', formula: 'CsF', color: '#FFF0B0', fact: 'Helps build special medicines in chemistry labs!', visual: 'sparkle' },
+  { inputs: ['Cs','Cl'], name: 'Cesium Chloride', formula: 'CsCl', color: '#FFE8A0', fact: 'Used to separate DNA in biology labs!', visual: 'bubble' },
+
+  // Krypton compounds
+  { inputs: ['Kr','F'], name: 'Krypton Difluoride', formula: 'KrF₂', color: '#B0D4FF', fact: 'One of the few noble gas compounds — super rare!', visual: 'sparkle' },
+
+  // Scandium compounds
+  { inputs: ['Sc','Al'], name: 'Scandium-Aluminum Alloy', formula: 'ScAl', color: '#C8C8C8', fact: 'Makes the lightest, strongest baseball bats!', visual: 'shiny' },
+
+  // Zirconium compounds
+  { inputs: ['Zr','O'], name: 'Cubic Zirconia', formula: 'ZrO₂', color: '#F0F0FF', fact: 'Fake diamond that sparkles just as bright!', visual: 'sparkle' },
+  { inputs: ['Zr','Si'], name: 'Zircon', formula: 'ZrSiO₄', color: '#DEB887', fact: 'Oldest mineral on Earth — 4.4 billion years old!', visual: 'sparkle' },
+
+  // Niobium compounds
+  { inputs: ['Nb','Ti'], name: 'Niobium-Titanium Alloy', formula: 'NbTi', color: '#7090A0', fact: 'Makes superconducting magnets in MRI machines!', visual: 'shiny' },
+  { inputs: ['Nb','O'], name: 'Niobium Oxide', formula: 'Nb₂O₅', color: '#A0B0C0', fact: 'Makes camera lenses sharper!', visual: 'shiny' },
+
+  // Cadmium compounds
+  { inputs: ['Cd','S'], name: 'Cadmium Sulfide', formula: 'CdS', color: '#FFD700', fact: 'Brilliant yellow pigment used by famous painters!', visual: 'shiny' },
+
+  // Indium compounds
+  { inputs: ['In','Sn'], name: 'Indium Tin Oxide', formula: 'ITO', color: '#E8E8D0', fact: 'Invisible conductor — makes every touchscreen work!', visual: 'sparkle' },
+
+  // Gallium compounds
+  { inputs: ['Ga','N'], name: 'Gallium Nitride', formula: 'GaN', color: '#0080FF', fact: 'Makes blue LEDs possible — won a Nobel Prize!', visual: 'sparkle' },
+  { inputs: ['Ga','O'], name: 'Gallium Oxide', formula: 'Ga₂O₃', color: '#F0F0F0', fact: 'Future of power electronics — more efficient than silicon!', visual: 'shiny' },
+
+  // Mercury compounds
+  { inputs: ['Hg','S'], name: 'Cinnabar', formula: 'HgS', color: '#FF0000', fact: 'Ancient red pigment — used in paint for thousands of years!', visual: 'shiny' },
+  { inputs: ['Hg','Au'], name: 'Mercury-Gold Amalgam', formula: 'HgAu', color: '#C0B000', fact: 'Old gold miners used mercury to extract gold!', visual: 'shiny' },
+
+  // Rare earth compounds
+  { inputs: ['Nd','Fe'], name: 'Neodymium Magnet', formula: 'Nd₂Fe₁₄B', color: '#C0C0D0', fact: 'Strongest magnets in the world — can pinch your fingers!', visual: 'shiny' },
+  { inputs: ['Ce','O'], name: 'Cerium Oxide', formula: 'CeO₂', color: '#FFF0E0', fact: 'Polishes glass to a perfect mirror finish!', visual: 'shiny' },
+  { inputs: ['Eu','O'], name: 'Europium Oxide', formula: 'Eu₂O₃', color: '#FF69B4', fact: 'Makes the red color in your TV screen!', visual: 'sparkle' },
+  { inputs: ['Gd','O'], name: 'Gadolinium Oxide', formula: 'Gd₂O₃', color: '#F5F5F5', fact: 'Used as MRI contrast — helps doctors see inside you!', visual: 'floaty' },
+  { inputs: ['La','O'], name: 'Lanthanum Oxide', formula: 'La₂O₃', color: '#FFF5EE', fact: 'Makes night vision lenses and special glass!', visual: 'shiny' },
+  { inputs: ['Sm','Co'], name: 'Samarium Cobalt Magnet', formula: 'SmCo₅', color: '#8080A0', fact: 'Magnets that work even at extreme temperatures!', visual: 'shiny' },
+  { inputs: ['Er','Si'], name: 'Erbium-Doped Fiber', formula: 'ErSi', color: '#FF77FF', fact: 'Boosts internet signals in fiber optic cables!', visual: 'sparkle' },
+  { inputs: ['Tb','Fe'], name: 'Terfenol-D', formula: 'TbFe₂', color: '#606060', fact: 'Changes shape in a magnetic field — morphing metal!', visual: 'shiny' },
+
+  // Radioactive/exotic combos
+  { inputs: ['Pu','O'], name: 'Plutonium Dioxide', formula: 'PuO₂', color: '#90EE90', fact: 'Powers spacecraft batteries for decades — Mars rovers use it!', visual: 'sparkle' },
+  { inputs: ['Am','O'], name: 'Americium Dioxide', formula: 'AmO₂', color: '#98FB98', fact: 'The radioactive bit inside your smoke detector!', visual: 'sparkle' },
+  { inputs: ['Ra','Cl'], name: 'Radium Chloride', formula: 'RaCl₂', color: '#7FFF00', fact: 'Marie Curie isolated this to discover radium!', visual: 'sparkle' },
+
+  // Fun alloys and minerals
+  { inputs: ['Hf','O'], name: 'Hafnium Oxide', formula: 'HfO₂', color: '#D0D0D0', fact: 'Makes computer chips run faster and cooler!', visual: 'shiny' },
+  { inputs: ['Ta','O'], name: 'Tantalum Pentoxide', formula: 'Ta₂O₅', color: '#B0B0B0', fact: 'Stores electricity in your phone\'s tiny capacitors!', visual: 'sparkle' },
+  { inputs: ['Re','W'], name: 'Rhenium-Tungsten Alloy', formula: 'ReW', color: '#505050', fact: 'Survives 3000°C — used in jet engines!', visual: 'shiny' },
+  { inputs: ['Ir','Os'], name: 'Osmiridium', formula: 'IrOs', color: '#404050', fact: 'Used to tip the fanciest fountain pens!', visual: 'shiny' },
+  { inputs: ['Rh','Pt'], name: 'Rhodium-Platinum Alloy', formula: 'RhPt', color: '#D8D8D8', fact: 'Used in catalytic converters to clean car exhaust!', visual: 'shiny' },
+  { inputs: ['Ru','O'], name: 'Ruthenium Oxide', formula: 'RuO₂', color: '#404040', fact: 'Could help make unlimited clean energy from water!', visual: 'sparkle' },
+  { inputs: ['Pd','H'], name: 'Palladium Hydride', formula: 'PdH', color: '#C0C0B0', fact: 'Palladium soaks up hydrogen like a sponge!', visual: 'bubble' },
+  { inputs: ['Y','Ba'], name: 'YBCO Superconductor', formula: 'YBa₂Cu₃O₇', color: '#2F4F4F', fact: 'Floats above magnets — real-life levitation!', visual: 'floaty' },
+  { inputs: ['Te','Bi'], name: 'Bismuth Telluride', formula: 'Bi₂Te₃', color: '#808090', fact: 'Turns heat directly into electricity — thermoelectric!', visual: 'sparkle' },
+  { inputs: ['Sb','Sn'], name: 'Pewter', formula: 'SnSb', color: '#909090', fact: 'Medieval mugs and plates were made of this!', visual: 'shiny' },
+  { inputs: ['Po','Pb'], name: 'Lead Polonide', formula: 'PbPo', color: '#90EE90', fact: 'Super radioactive — discovered in Marie Curie\'s lab!', visual: 'sparkle' },
 ];
 
 const MAX_BLOBS = 60;
