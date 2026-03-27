@@ -213,6 +213,7 @@ canvas {
 }
 #notification.show { transform: translate(-50%, -50%) scale(1); }
 #notification h3 { color: #e94560; font-size: 20px; margin-bottom: 4px; }
+#notifEmoji { font-size: 48px; line-height: 1.2; margin: 8px 0 4px; }
 #notification p { font-size: 14px; color: #ccc; }
 #notification .formula-big { font-size: 24px; color: #f0abfc; margin: 6px 0; }
 #timer { color: #fbbf24; font-size: 14px; font-weight: bold; display: none; }
@@ -484,6 +485,7 @@ canvas {
 </div>
 <div id="notification">
   <h3>New Discovery!</h3>
+  <div id="notifEmoji"></div>
   <div class="formula-big" id="notifFormula"></div>
   <p id="notifFact"></p>
 </div>
@@ -879,6 +881,57 @@ const COMPOUNDS = [
   { inputs: ['Sb','Sn'], name: 'Pewter', formula: 'SnSb', color: '#909090', fact: 'Medieval mugs and plates were made of this!', visual: 'shiny' },
   { inputs: ['Po','Pb'], name: 'Lead Polonide', formula: 'PbPo', color: '#90EE90', fact: 'Super radioactive — discovered in Marie Curie\'s lab!', visual: 'sparkle' },
 ];
+
+const COMPOUND_EMOJI = {
+  'Water': '💧', 'H₂ Gas': '💨', 'Ammonia': '🧴', 'Stomach Acid': '🧪', 'Methane': '🐄💨',
+  'Hydrofluoric': '🧪', 'Rotten Eggs': '🥚🤢', 'CO₂ Fizz': '🫧', 'Laughing Gas': '😂',
+  'Rust': '🟤', 'Soda Ash': '🪟', 'Glass': '🪟', 'Ruby': '❤️💎', 'Patina': '🗽',
+  'Quickite': '⚪🔥', 'Magnesia': '🧱', 'Potash': '🌱', 'Litharge': '🟡',
+  'White Paint': '🎨', 'Sunscreen': '🧴☀️', 'Chrome Green': '💚', 'Tungsten Oxide': '💡',
+  'Yellowcake': '☢️', 'Nickel Green': '💚', 'Salt': '🧂', 'Toothpaste': '🪥',
+  'Stink Salt': '🧂🤢', 'Steel': '⚙️', "Fool's Gold": '🪙✨', 'Stainless Steel': '🍴',
+  'Meteorite Metal': '☄️', 'Pirate Alloy': '🏴‍☠️', 'Bronze': '🥉', 'Brass': '🎺',
+  'Blue Crystal': '💙💎', 'Chalcopyrite': '⛏️', 'Gold Bar': '🥇', 'Electrum': '🪙⚡',
+  'Silver Chloride': '📷', 'Tarnish': '🥈🟤', 'Silver Bar': '🥈', 'Rose Gold': '🌹',
+  'Royal Alloy': '👑', 'Balloon Gas': '🎈', 'N₂ Air': '🌬️', 'Neon Sign': '💡🔴',
+  'Argon Shield': '🛡️', 'Ozone': '🌍🛡️', 'Diamond': '💎', 'Cyanide': '☠️',
+  'Calcium Carbide': '🔥', 'Fluorite': '💜💎', 'Galena': '⛏️', 'Solder': '🔩',
+  'Carborundum': '💎⚙️', 'Epsom Salt': '🛁', 'Phosphorus Glow': '🌟', 'Tin Oxide': '📱',
+  'Lo-Salt': '🧂💚', 'Gold Coating': '✨', 'Cupronickel': '🪙', 'Tungsten Carbide': '💍',
+  'Plat Catalyst': '🚗💨', 'Glow Paint': '🎨🌟', 'Thermite': '🔥🌋', 'Magnalium': '🎆',
+  'Chrome Steel': '🪞', 'Lithium Hydride': '🚀', 'Lithium Oxide': '🔋', 'Lithium Fluoride': '🔬',
+  'Lithium Chloride': '💧🔋', 'Beryllium Oxide': '⚪', 'Beryllium Aluminum Alloy': '🛩️',
+  'Sodium Bromide': '💊', 'Potassium Bromide': '📷', 'Silver Bromide': '📸',
+  'Hydrogen Bromide': '🧪', 'Potassium Iodide': '🧂💊', 'Sodium Iodide': '✨💊',
+  'Hydrogen Iodide': '🧪🟣', 'Silver Iodide': '🌧️', 'Xenon Difluoride': '✨🧪',
+  'Xenon Trioxide': '💥', 'Germanium Dioxide': '🌐', 'Germane': '💨',
+  'Gallium Arsenide': '💡📱', 'Arsine': '☠️💨', 'Hydrogen Selenide': '🤢',
+  'Sodium Selenide': '🔴', 'Cadmium Selenide': '🔴✨', 'Molybdenite': '⛏️',
+  'Molybdenum Trioxide': '🌱', 'Cobalt Blue': '💙🎨', 'Cobalt Sulfide': '💙⛏️',
+  'Manganese Dioxide': '🔋', 'Potassium Permanganate': '🟣🧪', 'Bismuth Oxide': '🌈',
+  'Bismuth Sulfide': '🌈⛏️', 'Thorium Oxide': '☢️💡', 'Uranium Dioxide': '☢️⚡',
+  'Uranium Hexafluoride': '☢️💨', 'Titanium Dioxide': '🤍☀️', 'Titanium Nitride': '🪙✨',
+  'Titanium Carbide': '⚙️💎', 'Chromium Oxide': '💚✨', 'Vanadium Pentoxide': '🌈🧪',
+  'Nickel Oxide': '💚🪙', 'Nickel Iron Alloy': '🌍⚙️', 'Zinc Oxide': '🧴',
+  'Zinc Sulfide': '🌟💚', 'Silver Sulfide': '🥈🟤', 'Silver Nitrate': '🥈🧪',
+  'Gold Chloride': '🥇🧪', 'Platinum Oxide': '⚙️✨', 'Cisplatin': '💊🏥',
+  'Tungsten Trioxide': '💡🟡', 'Osmium Tetroxide': '🧪🔬', 'Barium Sulfate': '🏥🩻',
+  'Barium Oxide': '🤍', 'Strontium Oxide': '📺', 'Strontium Sulfide': '🌟🔴',
+  'Rubidium Oxide': '🌙', 'Cesium Fluoride': '💊🧪', 'Cesium Chloride': '🧬',
+  'Krypton Difluoride': '💨✨', 'Scandium-Aluminum Alloy': '⚾', 'Cubic Zirconia': '💎✨',
+  'Zircon': '💎🔥', 'Niobium-Titanium Alloy': '🧲🔩', 'Niobium Oxide': '📷🔵',
+  'Cadmium Sulfide': '🟡🎨', 'Indium Tin Oxide': '📱✨', 'Gallium Nitride': '💡💙',
+  'Gallium Oxide': '⚡', 'Cinnabar': '🔴⛏️', 'Mercury-Gold Amalgam': '🪞🥇',
+  'Neodymium Magnet': '🧲', 'Cerium Oxide': '🪟✨', 'Europium Oxide': '💶🔴',
+  'Gadolinium Oxide': '🏥🧲', 'Lanthanum Oxide': '🔬', 'Samarium Cobalt Magnet': '🧲💙',
+  'Erbium-Doped Fiber': '🌐💡', 'Terfenol-D': '🧲🔊', 'Plutonium Dioxide': '🚀☢️',
+  'Americium Dioxide': '🚨☢️', 'Radium Chloride': '☢️💚', 'Meteor Iron': '☄️⚙️',
+  'Chromite': '⛏️⚙️', 'Lead Oxide': '🔴🔋', 'Hafnium Oxide': '💻⚙️',
+  'Tantalum Pentoxide': '📱⚙️', 'Rhenium-Tungsten Alloy': '✈️🔥', 'Osmiridium': '✒️',
+  'Rhodium-Platinum Alloy': '🚗✨', 'Ruthenium Oxide': '⚡🌊', 'Palladium Hydride': '💨⚙️',
+  'YBCO Superconductor': '🧊⚡', 'Bismuth Telluride': '❄️⚡', 'Pewter': '🍺',
+  'Lead Polonide': '☢️⚠️',
+};
 
 const MAX_BLOBS = 60;
 const MAX_PARTICLES = 200;
@@ -1334,11 +1387,13 @@ function toggleJournal() {
 let notifTimeout;
 function showNotification(compound) {
   const el = document.getElementById('notification');
+  const emoji = COMPOUND_EMOJI[compound.name] || '🧪';
+  document.getElementById('notifEmoji').textContent = emoji;
   document.getElementById('notifFormula').textContent = `${compound.formula} - ${compound.name}`;
   document.getElementById('notifFact').textContent = compound.fact;
   el.classList.add('show');
   clearTimeout(notifTimeout);
-  notifTimeout = setTimeout(() => el.classList.remove('show'), 2000);
+  notifTimeout = setTimeout(() => el.classList.remove('show'), 4500);
 }
 
 let toastTimeout;
