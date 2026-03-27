@@ -217,6 +217,19 @@ canvas {
 #notification p { font-size: 14px; color: #ccc; }
 #notification .formula-big { font-size: 24px; color: #f0abfc; margin: 6px 0; }
 #timer { color: #fbbf24; font-size: 14px; font-weight: bold; display: none; }
+#saveBtn {
+  padding: 4px 10px;
+  border-radius: 16px;
+  border: 2px solid #4ade80;
+  background: transparent;
+  color: #4ade80;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: bold;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+#saveBtn:hover { background: rgba(74,222,128,0.2); }
 #clearBtn, #deleteHint {
   padding: 4px 10px;
   border-radius: 16px;
@@ -466,6 +479,7 @@ canvas {
         <input type="checkbox" id="showAnswers" style="cursor:pointer;"> Answers
       </label>
       <span id="deleteHint">2x click = delete</span>
+      <button id="saveBtn" onclick="saveProgress()">💾 Save</button>
       <button id="clearBtn" onclick="clearBlobs()">Clear All</button>
       <button class="mode-btn active" onclick="setMode('solo')" id="btnSolo">1P</button>
       <button class="mode-btn" onclick="setMode('race')" id="btnRace">2P Race</button>
@@ -907,7 +921,7 @@ const COMPOUND_EMOJI = {
 const MAX_BLOBS = 60;
 const MAX_PARTICLES = 200;
 // The compound shelf takes up the bottom portion of the screen
-const SHELF_RATIO = 0.28; // bottom 28% is the compound shelf
+const SHELF_RATIO = 0.40; // bottom 40% is the compound shelf
 
 // ============ STATE ============
 let canvas, ctx;
@@ -937,6 +951,11 @@ function init() {
   createElementButtons();
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
+  // Load saved progress if available
+  const loaded = loadProgress();
+  if (loaded) {
+    showToast('Welcome back! Progress loaded (' + discoveredP1.size + ' compounds)');
+  }
   buildJournal();
   updateStars();
 
@@ -1266,14 +1285,18 @@ function onTouchEnd(e) {
 
 // ============ GAME MODES ============
 function setMode(mode) {
+  if (discoveredP1.size > 0 && !confirm('Switching mode will reset your progress.\n(Use 💾 Save first to keep your progress)')) return;
   gameMode = mode;
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(mode === 'solo' ? 'btnSolo' : mode === 'race' ? 'btnRace' : 'btnCollab').classList.add('active');
   document.getElementById('timer').style.display = mode === 'race' ? 'inline' : 'none';
-  resetGame();
+  resetGame(true);
 }
 
-function resetGame() {
+function resetGame(skipConfirm) {
+  if (!skipConfirm && discoveredP1.size > 0) {
+    if (!confirm('Reset game? Your discovered compounds will be cleared.\n(Use 💾 Save first to keep your progress)')) return;
+  }
   blobs = [];
   particles = [];
   discoveredP1 = new Set();
@@ -1286,6 +1309,7 @@ function resetGame() {
   document.getElementById('showAnswers').checked = false;
   scoreSubmitted = false;
   raceTimer = 0;
+  localStorage.removeItem(SAVE_KEY);
   buildJournal();
   updateStars();
 }
@@ -1516,6 +1540,80 @@ function escHtml(s) {
   const d = document.createElement('div');
   d.textContent = s;
   return d.innerHTML;
+}
+
+// ============ SAVE / LOAD PROGRESS ============
+const SAVE_KEY = 'glooplab_progress';
+
+function saveProgress() {
+  // Ask for name if not set yet
+  let name = localStorage.getItem('glooplab_lastname');
+  if (!name) {
+    name = prompt('Enter your name for the leaderboard:');
+    if (name && name.trim()) {
+      localStorage.setItem('glooplab_lastname', name.trim());
+    }
+  }
+  const data = {
+    discoveredP1: [...discoveredP1],
+    discoveredP2: [...discoveredP2],
+    gameMode,
+    raceTimer,
+    savedAt: new Date().toISOString(),
+  };
+  localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  showToast('Progress saved! (' + discoveredP1.size + ' compounds)');
+  // Also auto-update leaderboard with current progress
+  autoSaveLeaderboard();
+}
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (data.discoveredP1) {
+      discoveredP1 = new Set(data.discoveredP1);
+    }
+    if (data.discoveredP2) {
+      discoveredP2 = new Set(data.discoveredP2);
+    }
+    if (data.raceTimer) raceTimer = data.raceTimer;
+    if (data.gameMode) {
+      gameMode = data.gameMode;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(gameMode === 'solo' ? 'btnSolo' : gameMode === 'race' ? 'btnRace' : 'btnCollab').classList.add('active');
+    }
+    buildJournal();
+    updateStars();
+    return discoveredP1.size > 0;
+  } catch { return false; }
+}
+
+function autoSaveLeaderboard() {
+  // Auto-update the leaderboard entry for the current player
+  const name = localStorage.getItem('glooplab_lastname') || '';
+  if (!name || discoveredP1.size < 1) return;
+  const lb = getLeaderboard();
+  // Find existing entry for this name, or create new
+  const existing = lb.findIndex(e => e.name === name && e.mode === (gameMode === 'solo' ? '1P' : gameMode === 'race' ? 'Race' : 'Co-op'));
+  const secs = Math.floor(raceTimer / 60);
+  const entry = {
+    name,
+    discoveries: discoveredP1.size,
+    total: COMPOUNDS.length,
+    time: secs,
+    mode: gameMode === 'solo' ? '1P' : gameMode === 'race' ? 'Race' : 'Co-op',
+    date: new Date().toLocaleDateString(),
+  };
+  if (existing >= 0 && discoveredP1.size >= lb[existing].discoveries) {
+    lb[existing] = entry;
+  } else if (existing < 0) {
+    lb.push(entry);
+  }
+  lb.sort((a, b) => b.discoveries - a.discoveries || a.time - b.time);
+  if (lb.length > 20) lb.length = 20;
+  saveLeaderboard(lb);
 }
 
 // Track game start time for leaderboard
