@@ -910,9 +910,9 @@ function getShelfY() { return Math.floor(canvasH * (1 - SHELF_RATIO)); }
 function init() {
   canvas = document.getElementById('gameCanvas');
   ctx = canvas.getContext('2d');
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
   createElementButtons();
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
   buildJournal();
   updateStars();
 
