@@ -23,54 +23,66 @@ body {
 }
 #topBar {
   background: linear-gradient(135deg, #16213e, #0f3460);
-  padding: 6px 10px;
+  padding: 4px 10px;
+  border-bottom: 3px solid #e94560;
+  z-index: 10;
+}
+#topBarHeader {
   display: flex;
   align-items: center;
   gap: 6px;
-  border-bottom: 3px solid #e94560;
-  z-index: 10;
-  min-height: 54px;
+  margin-bottom: 2px;
 }
 #topBar h1 {
   color: #e94560;
-  font-size: 20px;
-  margin-right: 8px;
+  font-size: 18px;
   text-shadow: 0 0 10px rgba(233,69,96,0.5);
   white-space: nowrap;
 }
-#elementScroller {
-  flex: 1;
+#elementGrid {
   display: flex;
-  align-items: center;
-  gap: 3px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 2px 0;
+  flex-direction: column;
+  gap: 1px;
+  max-height: 180px;
+  overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #e94560 transparent;
 }
-#elementScroller::-webkit-scrollbar { height: 4px; }
-#elementScroller::-webkit-scrollbar-track { background: transparent; }
-#elementScroller::-webkit-scrollbar-thumb { background: #e94560; border-radius: 2px; }
-.cat-label {
+#elementGrid::-webkit-scrollbar { width: 4px; }
+#elementGrid::-webkit-scrollbar-track { background: transparent; }
+#elementGrid::-webkit-scrollbar-thumb { background: #e94560; border-radius: 2px; }
+.cat-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.cat-row .cat-label {
   color: #64748b;
-  font-size: 9px;
+  font-size: 8px;
   font-weight: bold;
   text-transform: uppercase;
-  writing-mode: vertical-rl;
-  letter-spacing: 1px;
-  padding: 0 1px;
+  letter-spacing: 0.5px;
+  width: 52px;
+  min-width: 52px;
+  text-align: right;
+  padding-right: 4px;
   white-space: nowrap;
   flex-shrink: 0;
 }
+.cat-elements {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  align-items: center;
+}
 .element-btn {
-  width: 38px;
-  height: 38px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 2px solid rgba(255,255,255,0.25);
   cursor: pointer;
   font-weight: bold;
-  font-size: 13px;
+  font-size: 11px;
   color: #fff;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
   transition: transform 0.12s, box-shadow 0.12s;
@@ -442,9 +454,9 @@ canvas {
 <body>
 <div id="gameContainer">
   <div id="topBar">
-    <h1>Gloop Lab</h1>
-    <div id="elementScroller"></div>
-    <div class="right-controls">
+    <div id="topBarHeader">
+      <h1>Gloop Lab</h1>
+      <div class="right-controls">
       <span id="stars"></span>
       <span id="timer"></span>
       <button id="leaderboardBtn" onclick="showLeaderboard()">Leaderboard</button>
@@ -457,7 +469,9 @@ canvas {
       <button class="mode-btn active" onclick="setMode('solo')" id="btnSolo">1P</button>
       <button class="mode-btn" onclick="setMode('race')" id="btnRace">2P Race</button>
       <button class="mode-btn" onclick="setMode('collab')" id="btnCollab">2P Co-op</button>
+      </div>
     </div>
+    <div id="elementGrid"></div>
   </div>
   <div id="mainArea">
     <canvas id="gameCanvas"></canvas>
@@ -929,24 +943,38 @@ function resizeCanvas() {
 }
 
 function createElementButtons() {
-  const container = document.getElementById('elementScroller');
+  const container = document.getElementById('elementGrid');
   container.innerHTML = '';
-  let currentCat = '';
+  // Group elements by category
+  const cats = [];
+  const catMap = {};
   ELEMENTS.forEach(el => {
-    if (el.cat !== currentCat) {
-      currentCat = el.cat;
-      const label = document.createElement('span');
-      label.className = 'cat-label';
-      label.textContent = currentCat;
-      container.appendChild(label);
+    if (!catMap[el.cat]) {
+      catMap[el.cat] = [];
+      cats.push(el.cat);
     }
-    const btn = document.createElement('button');
-    btn.className = 'element-btn';
-    btn.style.background = `radial-gradient(circle at 35% 35%, ${lighten(el.color, 40)}, ${el.color})`;
-    btn.innerHTML = `<span class="atomic-num">${el.num}</span>${el.symbol}`;
-    btn.title = `${el.name} (#${el.num}) - ${el.fact}`;
-    btn.onclick = () => spawnElement(el);
-    container.appendChild(btn);
+    catMap[el.cat].push(el);
+  });
+  cats.forEach(cat => {
+    const row = document.createElement('div');
+    row.className = 'cat-row';
+    const label = document.createElement('span');
+    label.className = 'cat-label';
+    label.textContent = cat;
+    row.appendChild(label);
+    const elems = document.createElement('div');
+    elems.className = 'cat-elements';
+    catMap[cat].forEach(el => {
+      const btn = document.createElement('button');
+      btn.className = 'element-btn';
+      btn.style.background = `radial-gradient(circle at 35% 35%, ${lighten(el.color, 40)}, ${el.color})`;
+      btn.innerHTML = `<span class="atomic-num">${el.num}</span>${el.symbol}`;
+      btn.title = `${el.name} (#${el.num}) - ${el.fact}`;
+      btn.onclick = () => spawnElement(el);
+      elems.appendChild(btn);
+    });
+    row.appendChild(elems);
+    container.appendChild(row);
   });
 }
 
